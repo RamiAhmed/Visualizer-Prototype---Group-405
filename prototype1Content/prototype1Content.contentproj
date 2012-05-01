@@ -59,11 +59,6 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="Port-Audio1.png">
-      <Name>Port-Audio1</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
     <Compile Include="Port-Firewire1_Scaled_GS.png">
       <Name>Port-Firewire1_Scaled_GS</Name>
       <Importer>TextureImporter</Importer>
@@ -127,6 +122,27 @@
   <ItemGroup>
     <Compile Include="stream_to_ground1.png">
       <Name>stream_to_ground1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="OBSTACLE_Fan1_Scaled_GS.png">
+      <Name>OBSTACLE_Fan1_Scaled_GS</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="stream_to_ground2.png">
+      <Name>stream_to_ground2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Port-Audio1_Scaled_GS.png">
+      <Name>Port-Audio1_Scaled_GS</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

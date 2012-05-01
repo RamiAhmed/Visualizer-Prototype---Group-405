@@ -30,6 +30,8 @@ namespace prototype1
         private BackgroundHandler bg;
         private ForegroundHandler fg;
 
+        private Sprite fan;
+
         public Prototype(Game game) : base(game)
         {
         
@@ -59,6 +61,14 @@ namespace prototype1
         {
             heroTexture = loadTexture("Rami_Walk_GS");
             surfaceTexture = loadTexture("ground");
+            
+
+            fan = new Sprite();
+            fan.Texture = loadTexture("OBSTACLE_Fan1_Scaled_GS");;
+            fan.Width = fan.Texture.Width;
+            fan.Height = fan.Texture.Height;
+            fan.Move(200, 350);
+            fan.Color = Color.Red;
 
             lateInit();
 
@@ -74,7 +84,7 @@ namespace prototype1
 
             fg.middleTextures.Add(loadTexture("stream_to_ground1"));
             fg.middleTextures.Add(loadTexture("stream_to_ground2"));
-            fg.middleTextures.Add(loadTexture("stream_to_ground3"));
+            //fg.middleTextures.Add(loadTexture("stream_to_ground3"));
 
             fg.sinusoidTextures.Add(loadTexture("ground_stream1"));
             fg.sinusoidTextures.Add(loadTexture("ground_stream2"));
@@ -85,7 +95,7 @@ namespace prototype1
         {
             bg.backgroundTextures.Add(loadTexture("Capacitor1_Scaled_GS"));
             bg.backgroundTextures.Add(loadTexture("Capacitor2_Scaled_GS"));
-            bg.backgroundTextures.Add(loadTexture("Port-Audio1"));
+            bg.backgroundTextures.Add(loadTexture("Port-Audio1_Scaled_GS"));
             bg.backgroundTextures.Add(loadTexture("Port-Firewire1_Scaled_GS"));
             bg.backgroundTextures.Add(loadTexture("Port-InternalSpeaker1_Scaled_GS"));
             bg.backgroundTextures.Add(loadTexture("Port-PS1_Scaled_GS"));
@@ -135,6 +145,10 @@ namespace prototype1
 
             batch.Begin();
             hero.drawHero(batch, gameTime);
+            batch.End();
+
+            batch.Begin();
+            batch.Draw(fan.Texture, fan.Position, fan.Color);
             batch.End();
 
             base.Draw(gameTime);

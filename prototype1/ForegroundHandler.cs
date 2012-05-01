@@ -15,8 +15,6 @@ namespace prototype1
 {
     class ForegroundHandler
     {
-
-
         // Surface variables (PAST PART)
         private long lastSurfaceMove = 0;
         private int surfaceMovementSpeed = 15;
@@ -101,9 +99,8 @@ namespace prototype1
         {
             if (surface != null && surface.Texture != null && surface.Active)
             {
-                float animationX = surfaceCurrentFrame * surfaceWidth;
-                Rectangle animationCycle = new Rectangle((int)(animationX), 0,
-                                                               surface.Width, surface.Height);
+                int animationX = (int)(surfaceCurrentFrame * surfaceWidth);
+                Rectangle animationCycle = new Rectangle(animationX, 0, surface.Width, surface.Height);
                 Rectangle surfaceRect = new Rectangle((int)surface.Position.X, (int)surface.Position.Y,
                                                             surface.Width, surface.Height);
                 batch.Draw(surface.Texture, surfaceRect, animationCycle, Color.White);
@@ -121,7 +118,7 @@ namespace prototype1
             {
                 lastSurfaceMove = currentMilliseconds;
 
-                if (surfaceCurrentFrame > (float)(surfaceTex.Width / surfaceWidth) - 1f)
+                if (surfaceCurrentFrame > (float)(surface.Texture.Width / surfaceWidth) - 1f)
                 {
                     surfaceCurrentFrame = 0f;
                 }
@@ -136,7 +133,7 @@ namespace prototype1
         {
             if (middleTextures.Count > 0)
             {
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     Sprite middleStream = new Sprite();
 
@@ -158,7 +155,7 @@ namespace prototype1
         {
             if (middleTextures.Count > 0)
             {
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
                     if (currentMilliseconds - lastMiddleUpdate[i] > middleUpdateSpeed * (i + 1))
