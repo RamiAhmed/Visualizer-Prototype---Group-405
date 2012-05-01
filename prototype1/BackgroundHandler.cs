@@ -26,68 +26,14 @@ namespace prototype1
         private long lastGeneration = 0;
         private int generationSpeed = 250; // every nth millisecond
 
-        // Surface variables
-        private long lastSurfaceMove = 0;
-        private int surfaceMovementSpeed = 15;
-        private float surfaceCurrentFrame = 0f;
-        private int surfaceWidth = 350;
-        public Texture2D surfaceTex;
-        private Sprite surface;
+
 
         public BackgroundHandler()
         {
         }
 
-        private void createSurface()
-        {
-            if (surface == null)
-            {
-                surface = new Sprite();
-
-                surface.Move(0, 470);
-
-                surface.Texture = surfaceTex;
-                surface.Width = surfaceWidth;
-                surface.Height = surface.Texture.Height;
-                surface.Color = Color.White;                
-                surface.Speed = 0;
-
-                surface.Active = true;
-            }
-        }
-
-        private void drawSurface(SpriteBatch batch)
-        {
-            if (surface != null && surface.Texture != null && surface.Active)
-            {
-                Rectangle animationCycle = new Rectangle((int)(surfaceCurrentFrame * surfaceWidth), 0,
-                                                               surface.Width, surface.Height);
-                batch.Draw(surface.Texture, surface.Position, animationCycle, Color.White);
-            }
-        }
-
-        private void updateSurface(GameTime gameTime)
-        {
-            long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
-            if (currentMilliseconds - lastSurfaceMove > surfaceMovementSpeed)
-            {
-                lastSurfaceMove = currentMilliseconds;
-
-                if (surfaceCurrentFrame > 3f)
-                {
-                    surfaceCurrentFrame = 0f;
-                }
-                else
-                {
-                    surfaceCurrentFrame += 0.01f;
-                }
-            }
-        }
-
         public void updateBackground(GameTime gameTime)
         {
-            updateSurface(gameTime);
-
             long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (currentMilliseconds - lastGeneration > generationSpeed)
             {
@@ -118,7 +64,6 @@ namespace prototype1
 
         public void drawBackground(SpriteBatch batch)
         {
-            drawSurface(batch);
             if (drawableBGSprites.Count > 0)
             {
                 foreach (Sprite bgSprite in drawableBGSprites)
@@ -129,17 +74,6 @@ namespace prototype1
                             new Vector2(0, bgSprite.Height), bgSprite.ScaleFactor * globalScale, SpriteEffects.None, bgSprite.LayerDepth);
                     }
                 }
-            }
-
-            if (surface != null && surface.Active)
-            {
-                Rectangle surfaceRect = new Rectangle((int)surface.Position.X, (int)surface.Position.Y,
-                                                        surface.Width, surface.Height);
-                batch.Draw(surface.Texture, surfaceRect, surface.Color);
-            }
-            else
-            {
-                createSurface();
             }
         }
 

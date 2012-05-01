@@ -70,7 +70,11 @@ namespace prototype1
 
         private void loadForegroundTextures()
         {
-            fg.middleTexture = loadTexture("stream_to_ground1");
+            fg.surfaceTex = surfaceTexture;
+
+            fg.middleTextures.Add(loadTexture("stream_to_ground1"));
+            fg.middleTextures.Add(loadTexture("stream_to_ground2"));
+            fg.middleTextures.Add(loadTexture("stream_to_ground3"));
 
             fg.sinusoidTextures.Add(loadTexture("ground_stream1"));
             fg.sinusoidTextures.Add(loadTexture("ground_stream2"));
@@ -79,8 +83,6 @@ namespace prototype1
 
         private void loadBackgroundTextures()
         {
-            bg.surfaceTex = surfaceTexture;
-
             bg.backgroundTextures.Add(loadTexture("Capacitor1_Scaled_GS"));
             bg.backgroundTextures.Add(loadTexture("Capacitor2_Scaled_GS"));
             bg.backgroundTextures.Add(loadTexture("Port-Audio1"));
@@ -127,7 +129,7 @@ namespace prototype1
             bg.drawBackground(batch);
             batch.End();
 
-            batch.Begin();
+            batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
             fg.drawForeground(batch);
             batch.End();
 

@@ -125,8 +125,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="stream_to ground2.png">
-      <Name>stream_to ground2</Name>
+    <Compile Include="stream_to_ground1.png">
+      <Name>stream_to_ground1</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
