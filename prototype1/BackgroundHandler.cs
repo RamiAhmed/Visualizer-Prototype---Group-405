@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework.Media;
 
 namespace prototype1
 {
-    class BackgroundHandler : Sprite
+    class BackgroundHandler 
     {
         // Class lists
         public List<Sprite> drawableBGSprites = new List<Sprite>();
@@ -25,8 +25,6 @@ namespace prototype1
         private float globalScale = 0.75f; // all bg objects are scaled by this value        
         private long lastGeneration = 0;
         private int generationSpeed = 250; // every nth millisecond
-
-
 
         public BackgroundHandler()
         {

@@ -15,67 +15,108 @@ namespace prototype1
 {
     class ForegroundHandler
     {
+        private int foregroundY = 475;
+        private int overlapArea = 5;
+
         // Surface variables (PAST PART)
-        private long lastSurfaceMove = 0;
-        private int surfaceMovementSpeed = 15;
-        private float surfaceCurrentFrame = 0f;
-        private int surfaceWidth = 350;
         public Texture2D surfaceTex;
         private Sprite surface;
+        private int surfaceWidth = 500;
+        private int surfaceMovementSpeed = 150;
+
+        // Connector
+        public Texture2D connectorTex;
+        private Sprite connector;
+        private int connectorWidth = 40;
+        private int connectorSpeed = 150;
 
         // Middle variables (PRESENT PART)
-        //public Texture2D middleTexture;
         public List<Texture2D> middleTextures = new List<Texture2D>();
         private List<Sprite> middleSprites = new List<Sprite>();
-        private int middleWidth = 250;
-        private int middleX = 350,
-                    middleY = 475;
-        private float[] currentMiddleFrame = {0f, 0f, 0f};
-        private long[] lastMiddleUpdate = {0, 0, 0};
-        private int middleUpdateSpeed = 5;
+        private int middleWidth = 224;
+        private int middleX = -1;
+        private int middleUpdateSpeed = 150;
 
-        /* Sinusoid variables (UNKNOWN PART) */
+        // Sinusoid variables (UNKNOWN PART) 
         public List<Texture2D> sinusoidTextures = new List<Texture2D>();
         public List<Sprite> sinusoidSprites = new List<Sprite>();
-        private int sinusoidWidth = 420;
-        private int sinusoidX = 600,
-                    sinusoidY = 475;
-        private float[] currentSinusoidFrame = {0f, 0f, 0f};
-        private long[] lastSinusoidUpdate = {0, 0, 0};
-        private int sinusoidUpdateSpeed = 50;
+        private int sinusoidWidth = 300;
+        private int sinusoidX = -1;
+        private int sinusoidUpdateSpeed = 150;
 
         public ForegroundHandler()
         {
+            middleWidth += overlapArea;
+            sinusoidWidth += overlapArea;
+
+            middleX = surfaceWidth;
+            sinusoidX = middleX + middleWidth - overlapArea+5;
         }
 
         public void updateForeground(GameTime gameTime)
         {
-            updateSurface(gameTime);
-
-            if (sinusoidSprites.Count > 0)
-            {
-                updateSinusoids(gameTime);
-            }
-            else
+            if (sinusoidSprites.Count <= 0)
             {
                 createSinusoids();
             }
 
-            if (middleSprites.Count > 0)
-            {
-                updateMiddleArea(gameTime);
-            }
-            else
+
+            if (middleSprites.Count <= 0)
             {
                 createMiddleArea();
             }
+
+            if (surface == null)
+            {
+                createSurface();
+            }
+
+            if (connector == null)
+            {
+                createConnector();
+            }
         }
 
-        public void drawForeground(SpriteBatch batch)
+        public void drawForeground(SpriteBatch batch, GameTime gameTime)
         {
-            drawSurface(batch);
-            drawSinusoids(batch);
-            drawMiddleArea(batch);
+            drawSurface(batch, gameTime);
+            drawSinusoids(batch, gameTime);
+            drawMiddleArea(batch, gameTime);
+            drawConnector(batch, gameTime);
+        }
+
+        private void createConnector()
+        {
+            if (connector == null)
+            {
+                connector = new Sprite();
+
+                connector.Texture = connectorTex;
+                connector.Width = connectorWidth;
+                connector.Height = connector.Texture.Height;
+
+                connector.Speed = 1f;
+                connector.Color = Color.White;
+                connector.LayerDepth = 0.2f;
+
+                connector.Active = true;
+
+                connector.Move(middleX - (connector.Width / 4), foregroundY);
+            }
+        }
+
+        private void drawConnector(SpriteBatch batch, GameTime gameTime)
+        {
+            if (connector != null && connector.Texture != null && connector.Active)
+            {
+                int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * connectorSpeed * connector.Speed) % 1800;
+
+                Rectangle connectorCycle = new Rectangle(animationX, 0, connector.Width, connector.Height);
+                Rectangle connectRect = new Rectangle((int)connector.Position.X, (int)connector.Position.Y,
+                                                            connector.Width, connector.Height);
+
+                batch.Draw(connector.Texture, connectRect, connectorCycle, connector.Color, 0f, new Vector2(0, 0), SpriteEffects.None, connector.LayerDepth);
+            }
         }
 
         private void createSurface()
@@ -84,66 +125,47 @@ namespace prototype1
             {
                 surface = new Sprite();
 
-                surface.Move(0, 470);
-
+                surface.Move(0, foregroundY);
+                surface.Speed = 1f;
                 surface.Texture = surfaceTex;
                 surface.Width = surfaceWidth;
                 surface.Height = surface.Texture.Height;
                 surface.Color = Color.White;
+                surface.LayerDepth = 0.6f;
 
                 surface.Active = true;
             }
         }
 
-        private void drawSurface(SpriteBatch batch)
+        private void drawSurface(SpriteBatch batch, GameTime gameTime)
         {
             if (surface != null && surface.Texture != null && surface.Active)
             {
-                int animationX = (int)(surfaceCurrentFrame * surfaceWidth);
+                int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * surfaceMovementSpeed * surface.Speed) % 1800;
+
                 Rectangle animationCycle = new Rectangle(animationX, 0, surface.Width, surface.Height);
                 Rectangle surfaceRect = new Rectangle((int)surface.Position.X, (int)surface.Position.Y,
                                                             surface.Width, surface.Height);
-                batch.Draw(surface.Texture, surfaceRect, animationCycle, Color.White);
-            }
-            else
-            {
-                createSurface();
-            }
-        }
-
-        private void updateSurface(GameTime gameTime)
-        {
-            long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
-            if (currentMilliseconds - lastSurfaceMove > surfaceMovementSpeed)
-            {
-                lastSurfaceMove = currentMilliseconds;
-
-                if (surfaceCurrentFrame > (float)(surface.Texture.Width / surfaceWidth) - 1f)
-                {
-                    surfaceCurrentFrame = 0f;
-                }
-                else
-                {
-                    surfaceCurrentFrame += 0.01f;
-                }
+                batch.Draw(surface.Texture, surfaceRect, animationCycle, surface.Color, 0f, new Vector2(0,0), SpriteEffects.None, surface.LayerDepth);
             }
         }
 
         private void createMiddleArea()
         {
-            if (middleTextures.Count > 0)
+            int middleTexturesCount = middleTextures.Count;
+            if (middleTexturesCount > 0)
             {
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < middleTexturesCount; i++)
                 {
                     Sprite middleStream = new Sprite();
 
                     middleStream.Texture = middleTextures[i];
-
+                    middleStream.Speed = (i + 1f) * 0.5f;
                     middleStream.Color = Color.White;
                     middleStream.Width = middleWidth;
                     middleStream.Height = middleStream.Texture.Height;
 
-                    middleStream.Move(middleX, middleY);
+                    middleStream.Move(middleX, foregroundY);
                     middleStream.Active = true;
 
                     middleSprites.Add(middleStream);
@@ -151,38 +173,15 @@ namespace prototype1
             }
         }
 
-        private void updateMiddleArea(GameTime gameTime)
-        {
-            if (middleTextures.Count > 0)
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
-                    if (currentMilliseconds - lastMiddleUpdate[i] > middleUpdateSpeed * (i + 1))
-                    {
-                        lastMiddleUpdate[i] = currentMilliseconds;
-                        if (currentMiddleFrame[i] > (float)(middleTextures[i].Width / middleWidth) - 1f)
-                        {
-                            currentMiddleFrame[i] = 0f;
-                        }
-                        else
-                        {
-                            currentMiddleFrame[i] += 0.01f;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void drawMiddleArea(SpriteBatch batch)
+        private void drawMiddleArea(SpriteBatch batch, GameTime gameTime)
         {
             foreach (Sprite middleSprite in middleSprites)
             {
                 if (middleSprite.Active)
                 {
-                    int index = middleSprites.IndexOf(middleSprite);
-                    Rectangle middleAnimation = new Rectangle((int)(currentMiddleFrame[index] * middleWidth), 0,
-                                                                    middleWidth, middleSprites[index].Height);
+                    int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * middleUpdateSpeed * middleSprite.Speed) % 1800;
+                    Rectangle middleAnimation = new Rectangle(animationX, 0, middleSprite.Width, middleSprite.Height);
+
                     batch.Draw(middleSprite.Texture, middleSprite.Position, middleAnimation, middleSprite.Color);
                 }
             }
@@ -192,7 +191,7 @@ namespace prototype1
         {
             if (sinusoidTextures.Count > 0)
             {
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < sinusoidTextures.Count; i++)
                 {
                     Sprite sinusoid = new Sprite();
 
@@ -201,8 +200,8 @@ namespace prototype1
                     sinusoid.Color = Color.White;
                     sinusoid.Width = sinusoidWidth;
                     sinusoid.Height = sinusoid.Texture.Height;
-                    sinusoid.Move(sinusoidX, sinusoidY);
-
+                    sinusoid.Move(sinusoidX, foregroundY);
+                    sinusoid.Speed = (i + 1f) * 0.5f;
                     sinusoid.Active = true;
 
                     float layerDepth = 0f;
@@ -212,14 +211,14 @@ namespace prototype1
                         case 2: layerDepth = 0.5f; break;
                         case 3: layerDepth = 0.1f; break;
                     }
-                    sinusoid.LayerDepth = layerDepth;
+                    sinusoid.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.01f);
 
                     sinusoidSprites.Add(sinusoid);
                 }
             }
         }
 
-        private void drawSinusoids(SpriteBatch batch)
+        private void drawSinusoids(SpriteBatch batch, GameTime gameTime)
         {
             if (sinusoidSprites.Count > 0)
             {
@@ -227,11 +226,12 @@ namespace prototype1
                 {
                     if (sinusoid.Active)
                     {
-                        int index = sinusoidSprites.IndexOf(sinusoid);
-                        Rectangle sinusoidAnimation = new Rectangle((int)(currentSinusoidFrame[index] * sinusoidWidth), 0, 
-                                                                     sinusoidWidth, sinusoid.Height);
+                        int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * sinusoidUpdateSpeed * sinusoid.Speed) % 1800;
+                        
+                        Rectangle sinusoidAnimation = new Rectangle(animationX, 0, sinusoid.Width, sinusoid.Height);
                         Rectangle sinusoidRect = new Rectangle((int)sinusoid.Position.X, (int)sinusoid.Position.Y,
                                                                 sinusoid.Width, sinusoid.Height);
+
                         batch.Draw(sinusoid.Texture, sinusoidRect, sinusoidAnimation, sinusoid.Color, 0f,
                                 new Vector2(0, 0), SpriteEffects.None, sinusoid.LayerDepth);
                     }
@@ -239,24 +239,5 @@ namespace prototype1
             }
         }
 
-        private void updateSinusoids(GameTime gameTime)
-        {
-            long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
-            for (int i = 0; i < 3; i++)
-            {
-                if ((currentMilliseconds - lastSinusoidUpdate[i]) > (sinusoidUpdateSpeed * (i+1)))
-                {
-                    lastSinusoidUpdate[i] = currentMilliseconds;
-                    if (currentSinusoidFrame[i] > 3f)
-                    {
-                        currentSinusoidFrame[i] = 0f;
-                    }
-                    else
-                    {
-                        currentSinusoidFrame[i] += 0.05f;
-                    }
-                }
-            }
-        }
     }
 }

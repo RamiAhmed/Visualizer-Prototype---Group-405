@@ -24,13 +24,12 @@ namespace prototype1
         /* Private variables */
         private List<Sprite> allSprites = new List<Sprite>();
         private OSCHandler osc;
-        private Texture2D heroTexture, surfaceTexture;
+        private Texture2D heroTexture, surfaceTexture, connectorTexture;
 
         private Hero hero;
         private BackgroundHandler bg;
         private ForegroundHandler fg;
-
-        private Sprite fan;
+        private ObstacleHandler obstacleHandler;
 
         public Prototype(Game game) : base(game)
         {
@@ -42,6 +41,7 @@ namespace prototype1
             hero = new Hero(heroTexture);
             bg = new BackgroundHandler();
             fg = new ForegroundHandler();
+            obstacleHandler = new ObstacleHandler();
             osc = new OSCHandler();
             RandomHandler.init();
         }
@@ -59,36 +59,43 @@ namespace prototype1
 
         protected override void LoadContent()
         {
+            connectorTexture = loadTexture("connection");
             heroTexture = loadTexture("Rami_Walk_GS");
             surfaceTexture = loadTexture("ground");
-            
-
-            fan = new Sprite();
-            fan.Texture = loadTexture("OBSTACLE_Fan1_Scaled_GS");;
-            fan.Width = fan.Texture.Width;
-            fan.Height = fan.Texture.Height;
-            fan.Move(200, 350);
-            fan.Color = Color.Red;
 
             lateInit();
 
+            loadObstacleTextures();
             loadForegroundTextures();
             loadBackgroundTextures();
 
             base.LoadContent();
         }
 
+        private void loadObstacleTextures()
+        {
+            // Holes
+            obstacleHandler.holeTextures.Add(loadTexture("OBSTACLE_Pit1_Scaled_GS"));
+
+            // Hills
+            obstacleHandler.hillTextures.Add(loadTexture("OBSTACLE_Tesla1_Scaled"));
+
+            // Slides
+            obstacleHandler.slideTextures.Add(loadTexture("OBSTACLE_Fan1_Scaled_GS"));
+        }
+
         private void loadForegroundTextures()
         {
+            fg.connectorTex = connectorTexture;
             fg.surfaceTex = surfaceTexture;
 
             fg.middleTextures.Add(loadTexture("stream_to_ground1"));
             fg.middleTextures.Add(loadTexture("stream_to_ground2"));
-            //fg.middleTextures.Add(loadTexture("stream_to_ground3"));
+            fg.middleTextures.Add(loadTexture("stream_to_ground3"));
 
             fg.sinusoidTextures.Add(loadTexture("ground_stream1"));
-            fg.sinusoidTextures.Add(loadTexture("ground_stream2"));
-            fg.sinusoidTextures.Add(loadTexture("ground_stream3"));
+            fg.sinusoidTextures.Add(loadTexture("ground_stream_d2"));
+            fg.sinusoidTextures.Add(loadTexture("ground_stream_d3"));
         }
 
         private void loadBackgroundTextures()
@@ -103,10 +110,12 @@ namespace prototype1
             bg.backgroundTextures.Add(loadTexture("RamBar1_Scaled_GS"));
             bg.backgroundTextures.Add(loadTexture("Resistor1_Scaled_GS"));
             bg.backgroundTextures.Add(loadTexture("LED1_Scaled_GS"));
+            bg.backgroundTextures.Add(loadTexture("Port-Optical1_Scaled_GS"));
         }
 
         public override void Update(GameTime gameTime)
         {
+            obstacleHandler.updateObstacles(gameTime);
             bg.updateBackground(gameTime);
             fg.updateForeground(gameTime);
             hero.updateHero(gameTime);
@@ -120,6 +129,7 @@ namespace prototype1
         {
             allSprites.Clear();
 
+            allSprites.AddRange(obstacleHandler.obstacleSprites);
             allSprites.AddRange(fg.sinusoidSprites);
             allSprites.AddRange(bg.drawableBGSprites);
             allSprites.Add(hero);
@@ -140,17 +150,17 @@ namespace prototype1
             batch.End();
 
             batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-            fg.drawForeground(batch);
+            fg.drawForeground(batch, gameTime);
+            batch.End();
+
+            batch.Begin();
+            obstacleHandler.drawObstacles(batch);
             batch.End();
 
             batch.Begin();
             hero.drawHero(batch, gameTime);
             batch.End();
-
-            batch.Begin();
-            batch.Draw(fan.Texture, fan.Position, fan.Color);
-            batch.End();
-
+ 
             base.Draw(gameTime);
         }
 
