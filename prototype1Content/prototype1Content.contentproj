@@ -42,13 +42,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Rami_Walk_GS.png">
-      <Name>Rami_Walk_GS</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Capacitor1_Scaled_GS.png">
       <Name>Capacitor1_Scaled_GS</Name>
       <Importer>TextureImporter</Importer>
@@ -127,13 +120,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OBSTACLE_Fan1_Scaled_GS.png">
-      <Name>OBSTACLE_Fan1_Scaled_GS</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="stream_to_ground2.png">
       <Name>stream_to_ground2</Name>
       <Importer>TextureImporter</Importer>
@@ -162,13 +148,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OBSTACLE_Tesla1_Scaled.png">
-      <Name>OBSTACLE_Tesla1_Scaled</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="connection.png">
       <Name>connection</Name>
       <Importer>TextureImporter</Importer>
@@ -183,18 +162,57 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ground_stream_d1.png">
-      <Name>ground_stream_d1</Name>
+    <Compile Include="Rami_Anim_GS.png">
+      <Name>Rami_Anim_GS</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="ground_stream_d2.png">
-      <Name>ground_stream_d2</Name>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="sin_to_stream_con1.png">
+      <Name>sin_to_stream_con1</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="ground_stream_d3.png">
-      <Name>ground_stream_d3</Name>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="OBSTACLE_Wall1_Scaled_GS.png">
+      <Name>OBSTACLE_Wall1_Scaled_GS</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BG_Mask1.png">
+      <Name>BG_Mask1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="OBSTACLE_Tesla1_Scaled_GS.png">
+      <Name>OBSTACLE_Tesla1_Scaled_GS</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="fog2.png">
+      <Name>fog2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="OBSTACLE_Fan1_Scaled_GS.png">
+      <Name>OBSTACLE_Fan1_Scaled_GS</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Sheep_Anim_GS.png">
+      <Name>Sheep_Anim_GS</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

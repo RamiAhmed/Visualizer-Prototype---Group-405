@@ -18,13 +18,20 @@ namespace prototype1
         // Class lists
         public List<Sprite> drawableBGSprites = new List<Sprite>();
         public List<Texture2D> backgroundTextures = new List<Texture2D>();
+        public List<Texture2D> fogTextures = new List<Texture2D>();
+
+        public Texture2D maskTex;
+        public List<Sprite> maskSprites = new List<Sprite>();
 
         // Creation of background elements
         private int xCreationPos = Prototype.TOTAL_WIDTH;
-        private int[] yCreationPos = { 250, 350, 450 };
-        private float globalScale = 0.75f; // all bg objects are scaled by this value        
+        private int[] yCreationPos = { 390, 425, 460 };
+        private float[] scaleValues = { 1f, 0.75f, 0.5f };
+        private float globalScale = 0.9f; // all bg objects are scaled by this value        
         private long lastGeneration = 0;
         private int generationSpeed = 250; // every nth millisecond
+        private bool fogCreated = false;
+        private Sprite fog;
 
         public BackgroundHandler()
         {
@@ -32,6 +39,17 @@ namespace prototype1
 
         public void updateBackground(GameTime gameTime)
         {
+            if (!fogCreated)
+            {
+                createFog();
+                fogCreated = true;
+            }
+
+            if (maskSprites.Count <= 0) 
+            {
+                createMask();
+            }
+
             long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (currentMilliseconds - lastGeneration > generationSpeed)
             {
@@ -60,18 +78,113 @@ namespace prototype1
             }
         }
 
-        public void drawBackground(SpriteBatch batch)
+        public void drawBackground(SpriteBatch batch, GameTime gameTime)
         {
             if (drawableBGSprites.Count > 0)
             {
+                drawMask(batch, gameTime);
+
                 foreach (Sprite bgSprite in drawableBGSprites)
                 {
                     if (bgSprite.Active)
                     {
-                        batch.Draw(bgSprite.Texture, bgSprite.Position, null, bgSprite.Color, 0, 
-                            new Vector2(0, bgSprite.Height), bgSprite.ScaleFactor * globalScale, SpriteEffects.None, bgSprite.LayerDepth);
+                        Color spriteColor = bgSprite.Color;
+                        if (bgSprite.Position.X > 550)
+                        {
+                            spriteColor = Color.Gray;
+                        }
+
+                        if (bgSprite.ScaleFactor == 1f && bgSprite.Speed == 0f)
+                        {
+                            Rectangle spriteRect = new Rectangle((int)bgSprite.Position.X, (int)bgSprite.Position.Y,
+                                                                    bgSprite.Width, bgSprite.Height);
+                            batch.Draw(bgSprite.Texture, spriteRect, null, spriteColor, 0f, 
+                                new Vector2(0, 0), SpriteEffects.None, bgSprite.LayerDepth);
+                        }
+                        else
+                        {
+                            batch.Draw(bgSprite.Texture, bgSprite.Position, null, spriteColor, 0,
+                                new Vector2(0, bgSprite.Height), bgSprite.ScaleFactor * globalScale, SpriteEffects.None, bgSprite.LayerDepth);
+                        }
                     }
                 }
+            }
+        }
+
+        private void drawMask(SpriteBatch batch, GameTime time)
+        {
+            if (maskSprites.Count > 0)
+            {
+                foreach (Sprite maskSprite in maskSprites)
+                {
+                    int animationX = (int)(time.TotalGameTime.TotalSeconds * maskSprite.Speed) % 10;
+
+                    /*if (maskSprites.IndexOf(maskSprite) == 0)
+                    {
+                        animationX *= 2;
+                    }*/
+
+                    Rectangle maskCycle = new Rectangle(animationX * maskSprite.Width, 0, maskSprite.Width, maskSprite.Height);
+                    Rectangle maskRect = new Rectangle((int)maskSprite.Position.X, (int)maskSprite.Position.Y,
+                                                            maskSprite.Width, maskSprite.Height);
+
+                    batch.Draw(maskSprite.Texture, maskRect, maskCycle, maskSprite.Color, 0f, new Vector2(0, 0), SpriteEffects.None, maskSprite.LayerDepth);
+                }
+            }
+        }
+
+        private void createMask()
+        {
+            if (maskSprites.Count <= 0)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    Sprite maskSprite = new Sprite();
+
+                    maskSprite.Texture = maskTex;
+                    maskSprite.Width = 351;
+                    maskSprite.Height = Prototype.TOTAL_HEIGHT;
+                    maskSprite.Color = Color.White;
+
+                    maskSprite.Active = true;
+                    maskSprite.LayerDepth = 1f;
+                    maskSprite.Speed = 12.5f/* + (i * 5f)*/;
+                    maskSprite.ScaleFactor = 0.999f + RandomHandler.GetRandomFloat(0.001f);
+
+                    maskSprite.Move(Prototype.TOTAL_WIDTH - maskSprite.Width + 12, 0);
+
+                    maskSprites.Add(maskSprite);
+                }
+            }
+        }
+
+        private void createFog()
+        {
+            for (int i = 0; i < 3; i++) {
+                fog = new Sprite();
+
+                fog.Texture = fogTextures[0];
+                fog.Width = fog.Texture.Width;
+                fog.Height = Prototype.TOTAL_HEIGHT;
+                fog.Color = Color.White;
+
+                fog.Active = true;
+
+                float layerDepth = 0f;
+                switch (i)
+                {
+                    case 0: layerDepth = 0.059f; break;
+                    case 1: layerDepth = 0.599f; break;
+                    case 2: layerDepth = 0.999f; break;
+                }
+
+                fog.LayerDepth = layerDepth;
+                fog.Speed = 0f;
+                fog.ScaleFactor = 1f;
+
+                fog.Move(0, 0);
+
+                drawableBGSprites.Add(fog);
             }
         }
 
@@ -83,7 +196,6 @@ namespace prototype1
             bgSprite.Speed = 4 - randomLayer;
 
             float yPos = yCreationPos[3 - randomLayer],
-                  scaleFactor = 1f,
                   layerDepth = 1f;
 
             bgSprite.Move(xCreationPos, yPos);
@@ -91,20 +203,14 @@ namespace prototype1
             switch (randomLayer)
             {
                 case 1: layerDepth = 0.9f; // layer 1 is foremost (front)
-                        scaleFactor = 1.25f; 
                         break;
                 case 2: layerDepth = 0.5f;  // layer 2 is in the middle
-                        scaleFactor = 1f; 
                         break;
                 case 3: layerDepth = 0.1f; // layer 3 is furthest away (back)
-                        scaleFactor = 0.75f;
                         break;
-                default: layerDepth = 0f;
-                         scaleFactor = 1f;
-                         break;
             }
             bgSprite.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.1f);
-            bgSprite.ScaleFactor = scaleFactor;
+            bgSprite.ScaleFactor = scaleValues[randomLayer-1];
 
             return bgSprite;
         }

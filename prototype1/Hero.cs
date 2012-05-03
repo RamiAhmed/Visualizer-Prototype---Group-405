@@ -15,37 +15,41 @@ namespace prototype1
 {
     class Hero : Sprite
     {
+        public Texture2D heroTex;
+
+        // Position & scale
         private Vector2 heroStartPosition = new Vector2(300, 385);
-        private Texture2D heroTexture;
+        private float heroScale = 1.5f;      
+        
+        // Getters & Setters
         private HeroState currentState;
         private float jumpHeight;
-        private float heroScale = 1.5f;
+
+        // Animation
         private long lastFrame = 0;
         private int currentFrame = 0;
         private int walkcycleSpeed = 75; // per nth millisecond
         private int amountOfFramesInWalkcycle = 8;
-        private float defaultJumpHeight = 15f;
 
-        private float gravity = 0.5f;
+        // Jumping
+        private float defaultJumpHeight = 10f;
+        private float superJumpChance = 0.50f;
+        private float failureChance = 0.05f;
+        private float gravity = 0.35f;
 
-        public enum HeroState { WALKING, JUMPING, SLIDING };
+        public enum HeroState { WALKING, SUPERJUMPING, JUMPING, SLIDING, KICKING };
 
-        public Hero(Texture2D texture)
+        public Hero()
         {
-            if (heroTexture == null)
-            {
-                heroTexture = texture;
-            }
-
-            init();
+            
         }
 
-        private void init()
+        public void createHero()
         {
             this.Move(heroStartPosition);
             this.Width = 100;
             this.Height = 100;
-            this.Texture = heroTexture;
+            this.Texture = heroTex;
             this.Active = true;
             this.CurrentState = HeroState.WALKING;
         }
@@ -70,6 +74,10 @@ namespace prototype1
                 else
                 {
                     currentFrame = 0;
+                    if (this.CurrentState == HeroState.SLIDING || this.CurrentState == HeroState.KICKING)
+                    {
+                        this.CurrentState = HeroState.WALKING;
+                    }
                 }
             }
             return currentFrame;
@@ -77,18 +85,78 @@ namespace prototype1
 
         public void drawHero(SpriteBatch batch, GameTime gameTime)
         {
-           // if (this.CurrentState == HeroState.WALKING)
-           // {
-                if (this.Active)
+            if (this.Active)
+            {
+                int yPos = 0;
+                switch (this.CurrentState)
                 {
-                    Rectangle walkcycle = new Rectangle(getCurrentFrame(gameTime) * 100, 0, this.Width, this.Height);
+                    case HeroState.JUMPING:
+                        yPos = this.Height + 1;
+                        walkcycleSpeed = 100;
+                        break;
 
-                    Rectangle heroRect = new Rectangle((int)heroStartPosition.X, (int)heroStartPosition.Y,
-                                                        this.Width, this.Height);
-                    //batch.Draw(this.Texture, heroRect, walkcycle, this.Color);
-                    batch.Draw(this.Texture, this.Position, walkcycle, this.Color, 0f, new Vector2(0, 0), heroScale, SpriteEffects.None, 0f);
+                    case HeroState.SLIDING:
+                        yPos = (this.Height + 1) * 2;
+                        walkcycleSpeed = 125;
+                        break;
+
+                    case HeroState.WALKING:
+                        yPos = 0;
+                        walkcycleSpeed = 75;
+                        break;
+
+                    case HeroState.KICKING: 
+                        yPos = (this.Height + 1) * 4;
+                        walkcycleSpeed = 85;
+                        break;
+
+                    case HeroState.SUPERJUMPING:
+                        yPos = (this.Height + 1) * 6;
+                        walkcycleSpeed = 175;
+                        break;
                 }
-           // }
+              
+
+                Rectangle animcycle = new Rectangle(getCurrentFrame(gameTime) * this.Width, yPos, this.Width, this.Height);
+
+                Rectangle heroRect = new Rectangle((int)heroStartPosition.X, (int)heroStartPosition.Y,
+                                                    this.Width, this.Height);
+
+                batch.Draw(this.Texture, this.Position, animcycle, this.Color, 0f, new Vector2(0, 0), heroScale, SpriteEffects.None, 0f);
+            }
+        }
+
+        private void startKick()
+        {
+            if (this.Active) 
+            {
+                if (this.CurrentState == HeroState.WALKING) {
+                    this.CurrentState = HeroState.KICKING;
+                    currentFrame = 0;
+                }
+            }
+        }
+
+        public void startAction(HeroState action)
+        {
+            switch (action)
+            {
+                case HeroState.SLIDING: startSlide(); break;
+                case HeroState.KICKING: startKick(); break;
+                case HeroState.JUMPING: startJump(); break;
+            }
+        }
+
+        private void startSlide()
+        {
+            if (this.Active)
+            {
+                if (this.CurrentState == HeroState.WALKING)
+                {
+                    this.CurrentState = HeroState.SLIDING;
+                    currentFrame = 0;
+                }
+            }
         }
 
         private void startJump()
@@ -98,30 +166,37 @@ namespace prototype1
                 if (this.CurrentState == HeroState.WALKING)
                 {
                     this.CurrentState = HeroState.JUMPING;
-                    this.JumpHeight = defaultJumpHeight;           
+                    this.JumpHeight = defaultJumpHeight + RandomHandler.GetRandomFloat(2.5f);
+                    if (RandomHandler.GetRandomFloat(1) < superJumpChance)
+                    {
+                        this.JumpHeight *= RandomHandler.GetRandomFloat(1.25f, 1.5f);
+                        Console.WriteLine("SUPER JUMP!");
+                        this.CurrentState = HeroState.SUPERJUMPING;
+                    }
                 }
             }
         }
 
         private void updateJump()
         {
-            if (this.CurrentState == HeroState.JUMPING)
+            if (this.CurrentState == HeroState.JUMPING || this.CurrentState == HeroState.SUPERJUMPING)
             {
-                this.Move(this.Position.X, this.Position.Y - this.JumpHeight);
-                this.JumpHeight -= gravity;
-
-                if (this.Position.Y >= heroStartPosition.Y)
+                if (this.JumpHeight == defaultJumpHeight)
                 {
-                    this.CurrentState = HeroState.WALKING;
-                    this.JumpHeight = 0;
-                    this.Move(heroStartPosition);
+                    this.Move(this.Position.X, this.Position.Y + 15);
+                    this.JumpHeight -= gravity;
                 }
-            }
-            else
-            {
-                if (RandomHandler.GetRandomFloat(1) < 0.0025f)
+                else
                 {
-                   startJump();
+                    this.Move(this.Position.X, this.Position.Y - this.JumpHeight);
+                    this.JumpHeight -= gravity;
+
+                    if (this.Position.Y >= heroStartPosition.Y && this.JumpHeight < 0)
+                    {
+                        this.CurrentState = HeroState.WALKING;
+                        this.JumpHeight = 0;
+                        this.Move(heroStartPosition);
+                    }
                 }
             }
         }

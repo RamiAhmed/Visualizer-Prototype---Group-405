@@ -37,6 +37,12 @@ namespace prototype1
         private int middleX = -1;
         private int middleUpdateSpeed = 150;
 
+        // The Mask
+        public Texture2D maskTex;
+        private Sprite mask;
+        private int maskWidth = 40;
+        private int maskSpeed = 150;
+
         // Sinusoid variables (UNKNOWN PART) 
         public List<Texture2D> sinusoidTextures = new List<Texture2D>();
         public List<Sprite> sinusoidSprites = new List<Sprite>();
@@ -75,6 +81,11 @@ namespace prototype1
             {
                 createConnector();
             }
+
+            if (mask == null)
+            {
+                createMask();
+            }
         }
 
         public void drawForeground(SpriteBatch batch, GameTime gameTime)
@@ -83,6 +94,41 @@ namespace prototype1
             drawSinusoids(batch, gameTime);
             drawMiddleArea(batch, gameTime);
             drawConnector(batch, gameTime);
+            drawMask(batch, gameTime);
+        }
+
+        private void createMask()
+        {
+            if (mask == null)
+            {
+                mask = new Sprite();
+
+                mask.Texture = maskTex;
+                mask.Width = maskWidth;
+                mask.Height = mask.Texture.Height;
+
+                mask.Speed = 0.5f;
+                mask.Color = Color.White;
+                mask.LayerDepth = 0f;
+
+                mask.Active = true;
+
+                mask.Move(sinusoidX, foregroundY);
+            }
+        }
+
+        private void drawMask(SpriteBatch batch, GameTime gameTime)
+        {
+            if (mask != null && mask.Texture != null && mask.Active)
+            {
+                int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * maskSpeed * mask.Speed) % 1800;
+
+                Rectangle maskCycle = new Rectangle(animationX, 0, mask.Width, mask.Height);
+                Rectangle maskRect = new Rectangle((int)mask.Position.X, (int)mask.Position.Y,
+                                                    mask.Width, mask.Height);
+
+                batch.Draw(mask.Texture, maskRect, maskCycle, mask.Color, 0f, new Vector2(0, 0), SpriteEffects.None, mask.LayerDepth);
+            }
         }
 
         private void createConnector()

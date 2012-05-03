@@ -18,9 +18,10 @@ namespace prototype1
         public List<Texture2D> holeTextures = new List<Texture2D>();
         public List<Texture2D> hillTextures = new List<Texture2D>();
         public List<Texture2D> slideTextures = new List<Texture2D>();
+        public List<Texture2D> wallTextures = new List<Texture2D>();
         public List<Obstacle> obstacleSprites = new List<Obstacle>();
 
-        private int obstacleCreationPointX = 450,
+        private int obstacleCreationPointX = 430,
                     obstacleCreationPointY = 540;
         private int obstacleCreationFrequency = 5000; // every nth millisecond
         private long lastObstacleCreation = 0;
@@ -31,7 +32,7 @@ namespace prototype1
 
         public void updateObstacles(GameTime gameTime)
         {
-            generateObstacles(gameTime);
+            //generateObstacles(gameTime);
             foreach (Obstacle obstacle in obstacleSprites)
             {
                 obstacle.Move(obstacle.Position.X - obstacle.Speed, obstacle.Position.Y);
@@ -46,8 +47,9 @@ namespace prototype1
                 switch (obstacle.Type)
                 {
                     case ObstacleType.HILL: yOffset = obstacle.Height - 2;  break;
-                    case ObstacleType.HOLE: yOffset = obstacle.Height - 25;  break;
-                    case ObstacleType.SLIDE: yOffset = (int)(obstacle.Height * 1.1f);  break;
+                    case ObstacleType.HOLE: yOffset = obstacle.Height - 34;  break;
+                    case ObstacleType.SLIDE: yOffset = obstacle.Height + 50;  break;
+                    case ObstacleType.WALL: yOffset = obstacle.Height; break;
                 }
                 Rectangle obsRect = new Rectangle((int)obstacle.Position.X, (int)obstacle.Position.Y,
                                                         obstacle.Width, obstacle.Height);
@@ -55,7 +57,8 @@ namespace prototype1
             }
         }
 
-        private void generateObstacles(GameTime gameTime)
+
+        public ObstacleType generateObstacles(GameTime gameTime)
         {
             long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (currentMilliseconds - lastObstacleCreation > obstacleCreationFrequency)
@@ -66,8 +69,11 @@ namespace prototype1
                 if (newObs != null)
                 {
                     obstacleSprites.Add(newObs);
+                    return newObs.Type;
                 }
             }
+
+            return ObstacleType.NULL;
         }
 
         private Obstacle createObstacle()
@@ -75,7 +81,7 @@ namespace prototype1
             Obstacle newObs = new Obstacle();
 
             ObstacleType obsType = ObstacleType.NULL;
-            int typeOfObstacle = RandomHandler.GetRandomInt(0, 3);
+            int typeOfObstacle = RandomHandler.GetRandomInt(0, 4);
             Texture2D obstacleTexture = null;
             switch (typeOfObstacle)
             {
@@ -88,6 +94,9 @@ namespace prototype1
                 case 2: obstacleTexture = getRandomSlideTexture();
                         obsType = ObstacleType.SLIDE;
                         break;
+                case 3: obstacleTexture = getRandomWallTexture();
+                        obsType = ObstacleType.WALL;
+                        break;
             }
             if (obstacleTexture != null)
             {
@@ -98,8 +107,7 @@ namespace prototype1
 
                 newObs.Texture = obstacleTexture;
 
-                // newObs.Color = new Color(RandomHandler.GetRandomFloat(1), RandomHandler.GetRandomFloat(1), RandomHandler.GetRandomFloat(1));
-                newObs.Color = Color.White;
+                newObs.Color = new Color(RandomHandler.GetRandomFloat(1), RandomHandler.GetRandomFloat(1), RandomHandler.GetRandomFloat(1));
                 newObs.Width = newObs.Texture.Width;
                 newObs.Height = newObs.Texture.Height;
                 newObs.Move(obstacleCreationPointX, obstacleCreationPointY);
@@ -113,6 +121,36 @@ namespace prototype1
 
             return newObs;
         }
+
+        private Texture2D getRandomWallTexture()
+        {
+            Texture2D wallTex = null;
+
+            if (wallTextures.Count > 0)
+            {
+                foreach (Texture2D tex in wallTextures)
+                {
+                    if (RandomHandler.GetRandomFloat(1) < 0.01f)
+                    {
+                        wallTex = tex;
+                        break;
+                    }
+                }
+
+                if (wallTex != null)
+                {
+                    return wallTex;
+                }
+                else
+                {
+                    return getRandomWallTexture();
+                }
+            }
+            else
+            {
+                return null;
+            }
+            }
 
         private Texture2D getRandomSlideTexture()
         {

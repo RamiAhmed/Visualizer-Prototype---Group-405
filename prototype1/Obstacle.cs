@@ -5,7 +5,7 @@ using System.Text;
 
 namespace prototype1
 {
-    public enum ObstacleType { HILL, HOLE, SLIDE, NULL };
+    public enum ObstacleType { HILL, HOLE, SLIDE, WALL, NULL };
 
     class Obstacle : Sprite
     {
