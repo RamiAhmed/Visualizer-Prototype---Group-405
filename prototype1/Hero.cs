@@ -18,7 +18,7 @@ namespace prototype1
         public Texture2D heroTex;
 
         // Position & scale
-        private Vector2 heroStartPosition = new Vector2(300, 385);
+        private Vector2 heroStartPosition = new Vector2(325, 385);
         private float heroScale = 1.5f;      
         
         // Getters & Setters
@@ -32,8 +32,8 @@ namespace prototype1
         private int amountOfFramesInWalkcycle = 8;
 
         // Jumping
-        private float defaultJumpHeight = 10f;
-        private float superJumpChance = 0.50f;
+        private float defaultJumpHeight = 9f;
+        private float superJumpChance = 0.10f;
         private float failureChance = 0.05f;
         private float gravity = 0.35f;
 
@@ -57,7 +57,7 @@ namespace prototype1
         public void updateHero(GameTime gameTime)
         {
             updateJump();
-            this.Color = new Color(RandomHandler.GetRandomFloat(1), RandomHandler.GetRandomFloat(1), RandomHandler.GetRandomFloat(1));
+            this.Color = ColorHandler.getCurrentColor();
         }
 
         private int getCurrentFrame(GameTime gameTime)
@@ -90,6 +90,11 @@ namespace prototype1
                 int yPos = 0;
                 switch (this.CurrentState)
                 {
+                    case HeroState.WALKING:
+                        yPos = 0;
+                        walkcycleSpeed = 75;
+                        break;
+
                     case HeroState.JUMPING:
                         yPos = this.Height + 1;
                         walkcycleSpeed = 100;
@@ -98,11 +103,6 @@ namespace prototype1
                     case HeroState.SLIDING:
                         yPos = (this.Height + 1) * 2;
                         walkcycleSpeed = 125;
-                        break;
-
-                    case HeroState.WALKING:
-                        yPos = 0;
-                        walkcycleSpeed = 75;
                         break;
 
                     case HeroState.KICKING: 
@@ -118,9 +118,6 @@ namespace prototype1
               
 
                 Rectangle animcycle = new Rectangle(getCurrentFrame(gameTime) * this.Width, yPos, this.Width, this.Height);
-
-                Rectangle heroRect = new Rectangle((int)heroStartPosition.X, (int)heroStartPosition.Y,
-                                                    this.Width, this.Height);
 
                 batch.Draw(this.Texture, this.Position, animcycle, this.Color, 0f, new Vector2(0, 0), heroScale, SpriteEffects.None, 0f);
             }

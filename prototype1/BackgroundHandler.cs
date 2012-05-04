@@ -16,7 +16,7 @@ namespace prototype1
     class BackgroundHandler 
     {
         // Class lists
-        public List<Sprite> drawableBGSprites = new List<Sprite>();
+        public List<Sprite> bgSprites = new List<Sprite>();
         public List<Texture2D> backgroundTextures = new List<Texture2D>();
         public List<Texture2D> fogTextures = new List<Texture2D>();
 
@@ -24,7 +24,7 @@ namespace prototype1
         public List<Sprite> maskSprites = new List<Sprite>();
 
         // Creation of background elements
-        private int xCreationPos = Prototype.TOTAL_WIDTH;
+        private int xCreationPos = Controller.TOTAL_WIDTH;
         private int[] yCreationPos = { 390, 425, 460 };
         private float[] scaleValues = { 1f, 0.75f, 0.5f };
         private float globalScale = 0.9f; // all bg objects are scaled by this value        
@@ -57,15 +57,15 @@ namespace prototype1
                 generateNewBackgroundObject();
             }
 
-            int drawableSpritesCount = drawableBGSprites.Count;
+            int drawableSpritesCount = bgSprites.Count;
             if (drawableSpritesCount > 0)
             {
                 for (int i = 0; i < drawableSpritesCount; i++)
                 {
-                    Sprite bgSprite = drawableBGSprites.ElementAt(i);
+                    Sprite bgSprite = bgSprites.ElementAt(i);
                     if (!bgSprite.Active)
                     {
-                        drawableBGSprites.RemoveAt(drawableBGSprites.IndexOf(bgSprite));
+                        bgSprites.RemoveAt(i);
 
                         i--;
                         drawableSpritesCount--;
@@ -80,11 +80,12 @@ namespace prototype1
 
         public void drawBackground(SpriteBatch batch, GameTime gameTime)
         {
-            if (drawableBGSprites.Count > 0)
+            
+            if (bgSprites.Count > 0)
             {
                 drawMask(batch, gameTime);
 
-                foreach (Sprite bgSprite in drawableBGSprites)
+                foreach (Sprite bgSprite in bgSprites)
                 {
                     if (bgSprite.Active)
                     {
@@ -119,11 +120,6 @@ namespace prototype1
                 {
                     int animationX = (int)(time.TotalGameTime.TotalSeconds * maskSprite.Speed) % 10;
 
-                    /*if (maskSprites.IndexOf(maskSprite) == 0)
-                    {
-                        animationX *= 2;
-                    }*/
-
                     Rectangle maskCycle = new Rectangle(animationX * maskSprite.Width, 0, maskSprite.Width, maskSprite.Height);
                     Rectangle maskRect = new Rectangle((int)maskSprite.Position.X, (int)maskSprite.Position.Y,
                                                             maskSprite.Width, maskSprite.Height);
@@ -143,7 +139,7 @@ namespace prototype1
 
                     maskSprite.Texture = maskTex;
                     maskSprite.Width = 351;
-                    maskSprite.Height = Prototype.TOTAL_HEIGHT;
+                    maskSprite.Height = Controller.TOTAL_HEIGHT;
                     maskSprite.Color = Color.White;
 
                     maskSprite.Active = true;
@@ -151,7 +147,7 @@ namespace prototype1
                     maskSprite.Speed = 12.5f/* + (i * 5f)*/;
                     maskSprite.ScaleFactor = 0.999f + RandomHandler.GetRandomFloat(0.001f);
 
-                    maskSprite.Move(Prototype.TOTAL_WIDTH - maskSprite.Width + 12, 0);
+                    maskSprite.Move(Controller.TOTAL_WIDTH - maskSprite.Width + 12, 0);
 
                     maskSprites.Add(maskSprite);
                 }
@@ -165,7 +161,7 @@ namespace prototype1
 
                 fog.Texture = fogTextures[0];
                 fog.Width = fog.Texture.Width;
-                fog.Height = Prototype.TOTAL_HEIGHT;
+                fog.Height = Controller.TOTAL_HEIGHT;
                 fog.Color = Color.White;
 
                 fog.Active = true;
@@ -184,7 +180,7 @@ namespace prototype1
 
                 fog.Move(0, 0);
 
-                drawableBGSprites.Add(fog);
+                bgSprites.Add(fog);
             }
         }
 
@@ -227,7 +223,7 @@ namespace prototype1
 
             bgObject = placeOnRandomLayer(bgObject);
 
-            drawableBGSprites.Add(bgObject);
+            bgSprites.Add(bgObject);
         }
 
         private Texture2D getRandomBGTexture()

@@ -41,8 +41,8 @@ namespace prototype1
                     this.Height = this.Texture.Height;
                 }
 
-                if ((this.Position.X < -this.Width  || this.Position.X > Prototype.TOTAL_WIDTH + this.Width) ||
-                    (this.Position.Y < -this.Height || this.Position.Y > Prototype.TOTAL_HEIGHT + this.Height))
+                if ((this.Position.X < -this.Width  || this.Position.X > Controller.TOTAL_WIDTH + this.Width) ||
+                    (this.Position.Y < -this.Height || this.Position.Y > Controller.TOTAL_HEIGHT + this.Height))
                 {
                     this.Position = new Vector2(-this.Texture.Width, -this.Texture.Height);
                     this.Active = false;

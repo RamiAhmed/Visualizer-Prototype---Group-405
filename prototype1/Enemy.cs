@@ -15,14 +15,17 @@ namespace prototype1
 {
     class Enemy : Sprite
     {
-        public List<Sprite> enemySprites = new List<Sprite>();
+        public List<Enemy> enemySprites = new List<Enemy>();
         public List<Texture2D> enemyTextures = new List<Texture2D>();
 
-        private Vector2 enemyStartPosition = new Vector2(25, 425);
+        private Vector2 enemyStartPosition = new Vector2(-5, 425);
 
-        private float enemyMoveSpeedFactor = 15f;
+        private float enemyAnimationSpeedFactor = 15f;
         private long lastEnemyCreation = 0;
-        private int enemyCreationSpeed = 2500;
+        private int enemyCreationSpeed = 5000;
+
+        // Getters & Setters
+        //private Rectangle boundingBox;
 
         public Enemy()
         {
@@ -37,11 +40,28 @@ namespace prototype1
                 createEnemy();
             }
 
-            if (enemySprites.Count > 0)
-            {
-                foreach (Enemy enemy in enemySprites)
+            int enemySpritesCount = enemySprites.Count;
+            if (enemySpritesCount > 0)
+            {                
+                for (int i = 0; i < enemySpritesCount; i++)
                 {
-                    //enemy.Move(enemy.Position.X + enemy.Speed, enemy.Position.Y);
+                    Enemy enemy = enemySprites.ElementAt(i);
+                    if (enemy.Active)
+                    {
+                        enemy.Move(enemy.Position.X + enemy.Speed, enemy.Position.Y + RandomHandler.GetRandomFloat(-1, 1));
+                       // enemy.BoundingBox = new Rectangle((int)enemy.Position.X, (int)enemy.Position.Y, enemy.Width, enemy.Height);
+                        if (enemy.Position.X > 500)
+                        {
+                            removeEnemy(enemy);
+                        }
+                    }
+                    else
+                    {
+                        enemySprites.RemoveAt(i);
+
+                        i--;
+                        enemySpritesCount--;
+                    }
                 }
             }
         }
@@ -52,13 +72,21 @@ namespace prototype1
             {
                 foreach (Enemy enemy in enemySprites)
                 {
-                    int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * enemyMoveSpeedFactor) % 8;
+                    int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * enemyAnimationSpeedFactor) % 8;
 
                     Rectangle enemyCycle = new Rectangle(animationX * enemy.Width, 0,
                                                             enemy.Width, enemy.Height);
 
                     batch.Draw(enemy.Texture, enemy.Position, enemyCycle, enemy.Color);
                 }
+            }
+        }
+
+        public void removeEnemy(Enemy enemy)
+        {
+            if (enemy != null)
+            {
+                enemy.Active = false;
             }
         }
 
@@ -72,7 +100,7 @@ namespace prototype1
                 enemy.Width = 100;
                 enemy.Height = 100;
 
-                enemy.Speed = 1.5f;
+                enemy.Speed = 0.5f;
                 enemy.LayerDepth = 0f;
                 enemy.ScaleFactor = 1f;
                 enemy.Color = ColorHandler.getCurrentColor();
@@ -83,7 +111,7 @@ namespace prototype1
 
                 enemySprites.Add(enemy);
             }
-        }
+        }        
 
         private Texture2D getRandomEnemyTexture()
         {
@@ -113,5 +141,12 @@ namespace prototype1
                 return null;
             }
         }
+        /*
+        public Rectangle BoundingBox
+        {
+            get { return boundingBox; }
+            set { boundingBox = value; }
+        }
+        */
     }
 }

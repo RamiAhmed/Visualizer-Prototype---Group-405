@@ -34,13 +34,13 @@ namespace prototype1
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            Components.Add(new Prototype(this));
+            Components.Add(new Controller(this));
 
             this.IsMouseVisible = true;
             this.IsFixedTimeStep = true;
             graphics.IsFullScreen = false;
-            graphics.PreferredBackBufferHeight = Prototype.TOTAL_HEIGHT;
-            graphics.PreferredBackBufferWidth = Prototype.TOTAL_WIDTH;
+            graphics.PreferredBackBufferHeight = Controller.TOTAL_HEIGHT;
+            graphics.PreferredBackBufferWidth = Controller.TOTAL_WIDTH;
             graphics.ApplyChanges();
             Window.Title = "Group 405 - Prototype";
 

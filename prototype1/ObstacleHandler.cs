@@ -21,7 +21,7 @@ namespace prototype1
         public List<Texture2D> wallTextures = new List<Texture2D>();
         public List<Obstacle> obstacleSprites = new List<Obstacle>();
 
-        private int obstacleCreationPointX = 430,
+        private int obstacleCreationPointX = 475,
                     obstacleCreationPointY = 540;
         private int obstacleCreationFrequency = 5000; // every nth millisecond
         private long lastObstacleCreation = 0;
@@ -32,10 +32,26 @@ namespace prototype1
 
         public void updateObstacles(GameTime gameTime)
         {
-            //generateObstacles(gameTime);
-            foreach (Obstacle obstacle in obstacleSprites)
+            int obstacleSpritesCount = obstacleSprites.Count;
+            for (int i = 0; i < obstacleSpritesCount; i++) 
             {
-                obstacle.Move(obstacle.Position.X - obstacle.Speed, obstacle.Position.Y);
+                Obstacle obstacle = obstacleSprites.ElementAt(i);
+                if (obstacle.Active)
+                {
+                    obstacle.Move(obstacle.Position.X - obstacle.Speed, obstacle.Position.Y);
+
+                    int yOffset = getObstacleYOffset(obstacle);
+                    obstacle.BoundingBox = new Rectangle((int)obstacle.Position.X, (int)obstacle.Position.Y,
+                                                    obstacle.Width, obstacle.Height);
+                }
+                else
+                {
+                    obstacleSprites.RemoveAt(i);
+
+                    i--;
+                    obstacleSpritesCount--;
+                }
+
             }
         }
 
@@ -43,17 +59,9 @@ namespace prototype1
         {
             foreach (Obstacle obstacle in obstacleSprites)
             {
-                int yOffset = 0;
-                switch (obstacle.Type)
-                {
-                    case ObstacleType.HILL: yOffset = obstacle.Height - 2;  break;
-                    case ObstacleType.HOLE: yOffset = obstacle.Height - 34;  break;
-                    case ObstacleType.SLIDE: yOffset = obstacle.Height + 50;  break;
-                    case ObstacleType.WALL: yOffset = obstacle.Height; break;
-                }
-                Rectangle obsRect = new Rectangle((int)obstacle.Position.X, (int)obstacle.Position.Y,
-                                                        obstacle.Width, obstacle.Height);
-                batch.Draw(obstacle.Texture, obsRect, null, obstacle.Color, 0f, new Vector2(0, yOffset), SpriteEffects.None, obstacle.LayerDepth);
+                int yOffset = getObstacleYOffset(obstacle);
+                //Rectangle obsRect = new Rectangle((int)obstacle.Position.X, (int)obstacle.Position.Y, obstacle.Width, obstacle.Height);
+                batch.Draw(obstacle.Texture, obstacle.BoundingBox, null, obstacle.Color, 0f, new Vector2(0, yOffset), SpriteEffects.None, obstacle.LayerDepth);
             }
         }
 
@@ -68,12 +76,24 @@ namespace prototype1
                 Obstacle newObs = createObstacle();
                 if (newObs != null)
                 {
-                    obstacleSprites.Add(newObs);
                     return newObs.Type;
                 }
             }
 
             return ObstacleType.NULL;
+        }
+
+        private int getObstacleYOffset(Obstacle obstacle)
+        {
+            int yOffset = obstacle.Height;
+            switch (obstacle.Type)
+            {
+                case ObstacleType.HILL: yOffset -= 2; break;
+                case ObstacleType.HOLE: yOffset -= 34; break;
+                case ObstacleType.SLIDE: yOffset += 50; break;
+                case ObstacleType.WALL: yOffset += 0; break;
+            }
+            return yOffset;
         }
 
         private Obstacle createObstacle()
@@ -98,6 +118,7 @@ namespace prototype1
                         obsType = ObstacleType.WALL;
                         break;
             }
+
             if (obstacleTexture != null)
             {
                 if (obsType != ObstacleType.NULL)
@@ -107,12 +128,14 @@ namespace prototype1
 
                 newObs.Texture = obstacleTexture;
 
-                newObs.Color = new Color(RandomHandler.GetRandomFloat(1), RandomHandler.GetRandomFloat(1), RandomHandler.GetRandomFloat(1));
+                newObs.Color = ColorHandler.getCurrentColor();
                 newObs.Width = newObs.Texture.Width;
                 newObs.Height = newObs.Texture.Height;
                 newObs.Move(obstacleCreationPointX, obstacleCreationPointY);
                 newObs.Speed = 2.5f;
                 newObs.Active = true;
+
+                obstacleSprites.Add(newObs);
             }
             else
             {

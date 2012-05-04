@@ -15,7 +15,7 @@ using Microsoft.Xna.Framework.Media;
 
 namespace prototype1
 {
-    class Prototype : DrawableGameComponent
+    class Controller : DrawableGameComponent
     {
         /* Public variables */
         public static int TOTAL_WIDTH = 1024,
@@ -31,7 +31,7 @@ namespace prototype1
         private ObstacleHandler obstacleHandler;
         private Enemy enemy;
 
-        public Prototype(Game game) : base(game)
+        public Controller(Game game) : base(game)
         {
         
         }
@@ -130,7 +130,7 @@ namespace prototype1
         }
 
         public override void Update(GameTime gameTime)
-        {
+        {            
             obstacleHandler.updateObstacles(gameTime);
             bg.updateBackground(gameTime);
             fg.updateForeground(gameTime);
@@ -144,6 +144,7 @@ namespace prototype1
                 createObstacle(gameTime);
             }
 
+            checkCollision();
 
             base.Update(gameTime);
         }
@@ -170,16 +171,46 @@ namespace prototype1
             allSprites.AddRange(obstacleHandler.obstacleSprites);
             allSprites.AddRange(fg.sinusoidSprites);
             allSprites.AddRange(bg.maskSprites);
-            allSprites.AddRange(bg.drawableBGSprites);
-            allSprites.Add(hero);
+            allSprites.AddRange(bg.bgSprites);
+            //allSprites.Add(hero);
 
             foreach (Sprite sprite in allSprites)
             {
                 sprite.CheckIsActive();
             }
         }
-        
 
+        private void checkCollision()
+        {
+            foreach (Enemy enemySprite in enemy.enemySprites) 
+            {
+                foreach (Obstacle obstacle in obstacleHandler.obstacleSprites)
+                {
+                    if (getIsWithinRange(obstacle.Position.X, enemySprite.Position.X, 50f) &&
+                        obstacle.Type != ObstacleType.SLIDE)
+                    {
+                        enemy.removeEnemy(enemySprite);
+                    }
+                    else if (getIsWithinRange(hero.Position.X, enemySprite.Position.X, 50f) &&
+                        enemySprite.Speed > 0f)
+                    {
+                        enemySprite.Speed -= 0.05f;
+                    }
+                }
+            }
+        }
+
+        private bool getIsWithinRange(float a, float b, float range)
+        {
+            bool inRange = false;
+            if (Math.Abs(a - b) < range)
+            {
+                inRange = true;
+            }
+
+            return inRange;
+        }
+        
         public override void Draw(GameTime gameTime)
         {
             SpriteBatch batch = (SpriteBatch)Game.Services.GetService(typeof(SpriteBatch));
@@ -231,7 +262,7 @@ namespace prototype1
                 fogTexture.Dispose();
             }
             bg.backgroundTextures.Clear();
-            bg.drawableBGSprites.Clear();
+            bg.bgSprites.Clear();
 
             osc.stopOSCServer();
 
