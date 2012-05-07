@@ -52,6 +52,7 @@ namespace prototype1
         {
             hero = new Hero();
             hero.heroTex = loadTexture("Rami_Anim_GS");
+            hero.shipCrashTex = loadTexture("ramiBotShipCrash");
 
             lateInit();
 
@@ -73,6 +74,9 @@ namespace prototype1
             osc = new OSCHandler();
 
             RandomHandler.init();
+            ColorHandler.loadColors();
+
+            GameStateHandler.CurrentState = GameState.STARTING; // Change to starting
         }
 
         private void loadEnemyTextures()
@@ -136,21 +140,24 @@ namespace prototype1
                 cameraHandler.updateCamera(gameTime, hero.Position);
             }
 
-            obstacleHandler.updateObstacles(gameTime);
             bg.updateBackground(gameTime);
             fg.updateForeground(gameTime);
-            hero.updateHero(gameTime);
-            enemy.updateEnemy(gameTime);
 
-            updateAllSprites();
-
-            if (RandomHandler.GetRandomInt(100) < 25)
+            if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
-                createObstacle(gameTime);
+                obstacleHandler.updateObstacles(gameTime);
+                hero.updateHero(gameTime);
+                enemy.updateEnemy(gameTime);
+
+                updateAllSprites();
+
+                if (RandomHandler.GetRandomInt(100) < 25)
+                {
+                    createObstacle(gameTime);
+                }
+
+                checkCollision();
             }
-
-            checkCollision();
-
             base.Update(gameTime);
         }
 
@@ -186,7 +193,7 @@ namespace prototype1
             allSprites.AddRange(fg.sinusoidSprites);
             allSprites.AddRange(bg.bgMaskSprites);
             allSprites.AddRange(bg.bgSprites);
-            //allSprites.Add(hero);
+            allSprites.Add(hero);
 
             foreach (Sprite sprite in allSprites)
             {
@@ -235,26 +242,18 @@ namespace prototype1
                 cameraHandler = new CameraHandler();
                 
             }
+
             batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, null, null, null, null, cameraHandler.getTransformation(graphicsManager.GraphicsDevice));
 
-            //batch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
             bg.drawBackground(batch, gameTime);
-            //batch.End();
-
-           // batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
             fg.drawForeground(batch, gameTime);
-           // batch.End();
-
-           // batch.Begin();
-            obstacleHandler.drawObstacles(batch, gameTime);
-           // batch.End();
-
-          //  batch.Begin();
             hero.drawHero(batch, gameTime);
-          //  batch.End();
 
-          //  batch.Begin();
-            enemy.drawEnemy(batch, gameTime);
+            if (GameStateHandler.CurrentState == GameState.RUNNING)
+            {
+                obstacleHandler.drawObstacles(batch, gameTime);
+                enemy.drawEnemy(batch, gameTime);
+            }
             batch.End();
  
             base.Draw(gameTime);
@@ -263,6 +262,7 @@ namespace prototype1
         protected override void UnloadContent()
         {
             hero.heroTex.Dispose();
+            hero.shipCrashTex.Dispose();
 
             foreach (Texture2D fgTexture in fg.sinusoidTextures)
             {

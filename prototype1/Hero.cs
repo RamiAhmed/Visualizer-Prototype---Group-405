@@ -17,6 +17,11 @@ namespace prototype1
     {
         public Texture2D heroTex;
 
+        // Crashing space ship (START)
+        public Texture2D shipCrashTex;
+        private Sprite crashingShip;
+        private float crashingShipAnimSpeed = 7.5f;
+
         // Position & scale
         private Vector2 heroStartPosition = new Vector2(350, 385);
         private float heroScale = 1.5f;      
@@ -32,7 +37,7 @@ namespace prototype1
         private int amountOfFramesInWalkcycle = 8;
 
         // Jumping
-        private float defaultJumpHeight = 9f;
+        private float defaultJumpHeight = 10f;
         private float superJumpChance = 0.10f;
         private float failureChance = 0.05f;
         private float gravity = 0.35f;
@@ -41,7 +46,7 @@ namespace prototype1
 
         public Hero()
         {
-            
+
         }
 
         public void createHero()
@@ -59,6 +64,49 @@ namespace prototype1
         {
             updateJump();
             this.Color = ColorHandler.getCurrentColor();
+        }
+
+        private void startIntroSequence()
+        {
+            crashingShip = new Sprite();
+
+            crashingShip.Texture = shipCrashTex;
+
+            crashingShip.Width = 500;
+            crashingShip.Height = 250;
+
+            crashingShip.Color = Color.White;
+            crashingShip.Speed = 4f;
+            crashingShip.LayerDepth = 0.25f;
+            crashingShip.ScaleFactor = 0.5f;
+
+            crashingShip.Move(-crashingShip.Width, 15);
+
+            crashingShip.Active = true;
+        }
+
+        private void drawIntroSequence(SpriteBatch batch, GameTime time)
+        {
+            if (crashingShip == null)
+            {
+                startIntroSequence();
+                return;
+            }
+
+            crashingShip.Move(crashingShip.Position.X + crashingShip.Speed, crashingShip.Position.Y + RandomHandler.GetRandomFloat(-2.5f, 4f));
+
+            int animationX = (int)(time.TotalGameTime.TotalSeconds * crashingShipAnimSpeed) % 4;
+            Rectangle animCycle = new Rectangle(animationX * crashingShip.Width, 0, 
+                                            crashingShip.Width, crashingShip.Height);
+
+            batch.Draw(crashingShip.Texture, crashingShip.Position, animCycle, crashingShip.Color, 0f, new Vector2(0, 0), crashingShip.ScaleFactor, SpriteEffects.None, crashingShip.LayerDepth);
+
+            if (crashingShip.Position.X > Controller.TOTAL_WIDTH)
+            {
+                crashingShip.Active = false;
+                GameStateHandler.CurrentState = GameState.RUNNING;
+                return;
+            }
         }
 
         private int getCurrentFrame(GameTime gameTime)
@@ -88,39 +136,50 @@ namespace prototype1
         {
             if (this.Active)
             {
-                int yPos = 0;
-                switch (this.CurrentState)
+                if (GameStateHandler.CurrentState == GameState.STARTING)
                 {
-                    case HeroState.WALKING:
-                        yPos = 0;
-                        walkcycleSpeed = 75;
-                        break;
-
-                    case HeroState.JUMPING:
-                        yPos = this.Height + 1;
-                        walkcycleSpeed = 100;
-                        break;
-
-                    case HeroState.SLIDING:
-                        yPos = (this.Height + 1) * 2;
-                        walkcycleSpeed = 125;
-                        break;
-
-                    case HeroState.KICKING: 
-                        yPos = (this.Height + 1) * 4;
-                        walkcycleSpeed = 85;
-                        break;
-
-                    case HeroState.SUPERJUMPING:
-                        yPos = (this.Height + 1) * 6;
-                        walkcycleSpeed = 175;
-                        break;
+                    drawIntroSequence(batch, gameTime);
                 }
-              
+                else if (GameStateHandler.CurrentState == GameState.RUNNING)
+                {
+                    int yPos = 0;
+                    switch (this.CurrentState)
+                    {
+                        case HeroState.WALKING:
+                            yPos = 0;
+                            walkcycleSpeed = 75;
+                            break;
 
-                Rectangle animcycle = new Rectangle(getCurrentFrame(gameTime) * this.Width, yPos, this.Width, this.Height);
+                        case HeroState.JUMPING:
+                            yPos = this.Height + 1;
+                            walkcycleSpeed = 100;
+                            break;
 
-                batch.Draw(this.Texture, this.Position, animcycle, this.Color, 0f, new Vector2(0, 0), heroScale, SpriteEffects.None, 0f);
+                        case HeroState.SLIDING:
+                            yPos = (this.Height + 1) * 2;
+                            walkcycleSpeed = 125;
+                            break;
+
+                        case HeroState.KICKING:
+                            yPos = (this.Height + 1) * 4;
+                            walkcycleSpeed = 85;
+                            break;
+
+                        case HeroState.SUPERJUMPING:
+                            yPos = (this.Height + 1) * 6;
+                            walkcycleSpeed = 175;
+                            break;
+                    }
+
+                    Rectangle animcycle = new Rectangle(getCurrentFrame(gameTime) * this.Width, yPos, this.Width, this.Height);
+
+                    batch.Draw(this.Texture, this.Position, animcycle, this.Color, 0f, new Vector2(0, 0), heroScale, SpriteEffects.None, 0f);
+                }
+            }
+            else
+            {
+                this.Move(heroStartPosition);
+                this.Active = true;
             }
         }
 

@@ -124,6 +124,7 @@
     <Compile Include="ColorHandler.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="ForegroundHandler.cs" />
+    <Compile Include="GameStateHandler.cs" />
     <Compile Include="Hero.cs" />
     <Compile Include="Obstacle.cs" />
     <Compile Include="ObstacleHandler.cs" />

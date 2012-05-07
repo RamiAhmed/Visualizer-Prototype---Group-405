@@ -13,22 +13,24 @@ using Microsoft.Xna.Framework.Media;
 
 namespace prototype1
 {
-    class ColorHandler
+    public static class ColorHandler
     {
-        private List<Color> acceptedColors = new List<Color>();
+        private static List<Color> acceptedColors = new List<Color>();
 
-        public ColorHandler()
+        public static void loadColors()
         {
-            init();
-        }
-
-        private void init()
-        {
-        }
-
-        private void loadColors()
-        {
-            //Color color = w
+            acceptedColors.Add(new Color(189, 225, 0));
+            acceptedColors.Add(new Color(26, 144, 27));
+            acceptedColors.Add(new Color(29, 144, 128));
+            acceptedColors.Add(new Color(25, 8, 136));
+            acceptedColors.Add(new Color(126, 6, 129));
+            acceptedColors.Add(new Color(214, 22, 138));
+            acceptedColors.Add(new Color(111, 14, 71));
+            acceptedColors.Add(new Color(160, 16, 0));
+            acceptedColors.Add(new Color(250, 21, 0));
+            acceptedColors.Add(new Color(248, 129, 0));
+            acceptedColors.Add(new Color(238, 241, 117));
+            acceptedColors.Add(new Color(246, 245, 0));
         }
 
         public static Color getCurrentColor()
@@ -38,9 +40,7 @@ namespace prototype1
 
         public static Color getRandomColor()
         {
-            return new Color(RandomHandler.GetRandomFloat(1),
-                             RandomHandler.GetRandomFloat(1),
-                             RandomHandler.GetRandomFloat(1));
+            return acceptedColors.ElementAt(RandomHandler.GetRandomInt(acceptedColors.Count-1));
         }
     }
 }

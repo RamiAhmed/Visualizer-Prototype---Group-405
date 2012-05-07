@@ -164,6 +164,7 @@ namespace prototype1
                 newObs.Width = newWidth;
                 newObs.Height = newObs.Texture.Height;
                 newObs.Move(obstacleCreationPointX, obstacleCreationPointY);
+                newObs.AnimationSpeed = obstacleAnimSpeed;
                 newObs.Speed = 2.5f;
                 newObs.LayerDepth = 0.1f;
                 newObs.Active = true;
