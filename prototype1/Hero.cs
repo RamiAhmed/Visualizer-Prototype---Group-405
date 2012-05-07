@@ -18,7 +18,7 @@ namespace prototype1
         public Texture2D heroTex;
 
         // Position & scale
-        private Vector2 heroStartPosition = new Vector2(325, 385);
+        private Vector2 heroStartPosition = new Vector2(350, 385);
         private float heroScale = 1.5f;      
         
         // Getters & Setters
@@ -51,6 +51,7 @@ namespace prototype1
             this.Height = 100;
             this.Texture = heroTex;
             this.Active = true;
+            this.LayerDepth = 1f;
             this.CurrentState = HeroState.WALKING;
         }
 
@@ -123,17 +124,6 @@ namespace prototype1
             }
         }
 
-        private void startKick()
-        {
-            if (this.Active) 
-            {
-                if (this.CurrentState == HeroState.WALKING) {
-                    this.CurrentState = HeroState.KICKING;
-                    currentFrame = 0;
-                }
-            }
-        }
-
         public void startAction(HeroState action)
         {
             switch (action)
@@ -141,6 +131,18 @@ namespace prototype1
                 case HeroState.SLIDING: startSlide(); break;
                 case HeroState.KICKING: startKick(); break;
                 case HeroState.JUMPING: startJump(); break;
+            }
+        }
+
+        private void startKick()
+        {
+            if (this.Active)
+            {
+                if (this.CurrentState == HeroState.WALKING)
+                {
+                    this.CurrentState = HeroState.KICKING;
+                    currentFrame = 0;
+                }
             }
         }
 
@@ -163,7 +165,7 @@ namespace prototype1
                 if (this.CurrentState == HeroState.WALKING)
                 {
                     this.CurrentState = HeroState.JUMPING;
-                    this.JumpHeight = defaultJumpHeight + RandomHandler.GetRandomFloat(2.5f);
+                    this.JumpHeight = defaultJumpHeight + RandomHandler.GetRandomFloat(1f);
                     if (RandomHandler.GetRandomFloat(1) < superJumpChance)
                     {
                         this.JumpHeight *= RandomHandler.GetRandomFloat(1.25f, 1.5f);
@@ -178,22 +180,14 @@ namespace prototype1
         {
             if (this.CurrentState == HeroState.JUMPING || this.CurrentState == HeroState.SUPERJUMPING)
             {
-                if (this.JumpHeight == defaultJumpHeight)
-                {
-                    this.Move(this.Position.X, this.Position.Y + 15);
-                    this.JumpHeight -= gravity;
-                }
-                else
-                {
-                    this.Move(this.Position.X, this.Position.Y - this.JumpHeight);
-                    this.JumpHeight -= gravity;
+                this.Move(this.Position.X, this.Position.Y - this.JumpHeight);
+                this.JumpHeight -= gravity;
 
-                    if (this.Position.Y >= heroStartPosition.Y && this.JumpHeight < 0)
-                    {
-                        this.CurrentState = HeroState.WALKING;
-                        this.JumpHeight = 0;
-                        this.Move(heroStartPosition);
-                    }
+                if (this.Position.Y >= heroStartPosition.Y && this.JumpHeight < 0)
+                {
+                    this.CurrentState = HeroState.WALKING;
+                    this.JumpHeight = 0;
+                    this.Move(heroStartPosition);
                 }
             }
         }

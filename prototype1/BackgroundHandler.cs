@@ -30,7 +30,7 @@ namespace prototype1
         private float globalScale = 0.9f; // all bg objects are scaled by this value        
         private long lastGeneration = 0;
         private int generationSpeed = 250; // every nth millisecond
-        private bool fogCreated = false;
+        //private bool fogCreated = false;
         private Sprite fog;
 
         public BackgroundHandler()
@@ -39,10 +39,10 @@ namespace prototype1
 
         public void updateBackground(GameTime gameTime)
         {
-            if (!fogCreated)
+            if (fog == null)
             {
                 createFog();
-                fogCreated = true;
+                //fogCreated = true;
             }
 
             if (maskSprites.Count <= 0) 
@@ -143,8 +143,8 @@ namespace prototype1
                     maskSprite.Color = Color.White;
 
                     maskSprite.Active = true;
-                    maskSprite.LayerDepth = 1f;
-                    maskSprite.Speed = 12.5f/* + (i * 5f)*/;
+                    maskSprite.LayerDepth = 0f;
+                    maskSprite.Speed = 12.5f;
                     maskSprite.ScaleFactor = 0.999f + RandomHandler.GetRandomFloat(0.001f);
 
                     maskSprite.Move(Controller.TOTAL_WIDTH - maskSprite.Width + 12, 0);
@@ -169,9 +169,9 @@ namespace prototype1
                 float layerDepth = 0f;
                 switch (i)
                 {
-                    case 0: layerDepth = 0.059f; break;
-                    case 1: layerDepth = 0.599f; break;
-                    case 2: layerDepth = 0.999f; break;
+                    case 0: layerDepth = 0.99f; break;
+                    case 1: layerDepth = 0.59f; break;
+                    case 2: layerDepth = 0.19f; break;
                 }
 
                 fog.LayerDepth = layerDepth;
@@ -198,11 +198,11 @@ namespace prototype1
 
             switch (randomLayer)
             {
-                case 1: layerDepth = 0.9f; // layer 1 is foremost (front)
+                case 1: layerDepth = 0.1f; // layer 1 is furthest away (back)
                         break;
                 case 2: layerDepth = 0.5f;  // layer 2 is in the middle
                         break;
-                case 3: layerDepth = 0.1f; // layer 3 is furthest away (back)
+                case 3: layerDepth = 0.9f; // layer 3 is foremost (front)
                         break;
             }
             bgSprite.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.1f);

@@ -35,7 +35,7 @@ namespace prototype1
         {
             if (this.Active)
             {
-                if (this.Width == 0 && this.Height == 0 && this.Texture != null)
+                if (this.Width <= 0 && this.Height <= 0 && this.Texture != null)
                 {
                     this.Width = this.Texture.Width;
                     this.Height = this.Texture.Height;

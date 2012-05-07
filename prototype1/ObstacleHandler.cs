@@ -25,6 +25,7 @@ namespace prototype1
                     obstacleCreationPointY = 540;
         private int obstacleCreationFrequency = 5000; // every nth millisecond
         private long lastObstacleCreation = 0;
+        private float obstacleAnimSpeed = 5f;
 
         public ObstacleHandler()
         {
@@ -40,7 +41,6 @@ namespace prototype1
                 {
                     obstacle.Move(obstacle.Position.X - obstacle.Speed, obstacle.Position.Y);
 
-                    int yOffset = getObstacleYOffset(obstacle);
                     obstacle.BoundingBox = new Rectangle((int)obstacle.Position.X, (int)obstacle.Position.Y,
                                                     obstacle.Width, obstacle.Height);
                 }
@@ -55,32 +55,55 @@ namespace prototype1
             }
         }
 
-        public void drawObstacles(SpriteBatch batch)
+        public void drawObstacles(SpriteBatch batch, GameTime gameTime)
         {
             foreach (Obstacle obstacle in obstacleSprites)
             {
-                int yOffset = getObstacleYOffset(obstacle);
-                //Rectangle obsRect = new Rectangle((int)obstacle.Position.X, (int)obstacle.Position.Y, obstacle.Width, obstacle.Height);
-                batch.Draw(obstacle.Texture, obstacle.BoundingBox, null, obstacle.Color, 0f, new Vector2(0, yOffset), SpriteEffects.None, obstacle.LayerDepth);
+                if (obstacle.Active)
+                {
+                    Rectangle animCycle;
+                    if (obstacle.AnimateOnDeath && obstacle.ReadyToAnimate)
+                    {
+                        int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * obstacleAnimSpeed) % 5;
+                        if (animationX >= 4 && !obstacle.StayAtFrame)
+                        {
+                            obstacle.StayAtFrame = true;
+                        }
+
+                        if (obstacle.StayAtFrame)
+                        {
+                            animCycle = new Rectangle(4 * obstacle.Width, 0, obstacle.Width, obstacle.Height);
+                        }
+                        else
+                        {
+                            animCycle = new Rectangle(animationX * obstacle.Width, 0, obstacle.Width, obstacle.Height);
+                        }
+                    }
+                    else
+                    {
+                        animCycle = new Rectangle(0, 0, obstacle.Width, obstacle.Height);
+                    }
+
+                    int yOffset = getObstacleYOffset(obstacle);
+
+                    batch.Draw(obstacle.Texture, obstacle.BoundingBox, animCycle, obstacle.Color, 0f, new Vector2(0, yOffset), SpriteEffects.None, obstacle.LayerDepth);
+                }
             }
         }
 
 
-        public ObstacleType generateObstacles(GameTime gameTime)
+        public Obstacle generateObstacles(GameTime gameTime)
         {
+            Obstacle newObs = null;
             long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (currentMilliseconds - lastObstacleCreation > obstacleCreationFrequency)
             {
                 lastObstacleCreation = currentMilliseconds;
 
-                Obstacle newObs = createObstacle();
-                if (newObs != null)
-                {
-                    return newObs.Type;
-                }
+                newObs = createObstacle();
             }
 
-            return ObstacleType.NULL;
+            return newObs;
         }
 
         private int getObstacleYOffset(Obstacle obstacle)
@@ -101,7 +124,8 @@ namespace prototype1
             Obstacle newObs = new Obstacle();
 
             ObstacleType obsType = ObstacleType.NULL;
-            int typeOfObstacle = RandomHandler.GetRandomInt(0, 4);
+            int typeOfObstacle = RandomHandler.GetRandomInt(0, 4),
+                newWidth = 0;
             Texture2D obstacleTexture = null;
             switch (typeOfObstacle)
             {
@@ -116,6 +140,8 @@ namespace prototype1
                         break;
                 case 3: obstacleTexture = getRandomWallTexture();
                         obsType = ObstacleType.WALL;
+                        newObs.AnimateOnDeath = true;
+                        newWidth = 100;
                         break;
             }
 
@@ -129,11 +155,24 @@ namespace prototype1
                 newObs.Texture = obstacleTexture;
 
                 newObs.Color = ColorHandler.getCurrentColor();
-                newObs.Width = newObs.Texture.Width;
+
+                if (newWidth == 0)
+                {
+                    newWidth = newObs.Texture.Width;
+                }
+
+                newObs.Width = newWidth;
                 newObs.Height = newObs.Texture.Height;
                 newObs.Move(obstacleCreationPointX, obstacleCreationPointY);
                 newObs.Speed = 2.5f;
+                newObs.LayerDepth = 0.1f;
                 newObs.Active = true;
+
+                newObs.ReadyToAnimate = false;
+                if (newObs.AnimateOnDeath != true)
+                {
+                    newObs.AnimateOnDeath = false;
+                }
 
                 obstacleSprites.Add(newObs);
             }
@@ -147,27 +186,9 @@ namespace prototype1
 
         private Texture2D getRandomWallTexture()
         {
-            Texture2D wallTex = null;
-
             if (wallTextures.Count > 0)
             {
-                foreach (Texture2D tex in wallTextures)
-                {
-                    if (RandomHandler.GetRandomFloat(1) < 0.01f)
-                    {
-                        wallTex = tex;
-                        break;
-                    }
-                }
-
-                if (wallTex != null)
-                {
-                    return wallTex;
-                }
-                else
-                {
-                    return getRandomWallTexture();
-                }
+                return getRandomTexture(wallTextures);
             }
             else
             {
@@ -177,27 +198,9 @@ namespace prototype1
 
         private Texture2D getRandomSlideTexture()
         {
-            Texture2D slideTex = null;
-
             if (slideTextures.Count > 0)
             {
-                foreach (Texture2D tex in slideTextures)
-                {
-                    if (RandomHandler.GetRandomFloat(1) < 0.01f)
-                    {
-                        slideTex = tex;
-                        break;
-                    }
-                }
-
-                if (slideTex != null)
-                {
-                    return slideTex;
-                }
-                else
-                {
-                    return getRandomSlideTexture();
-                }
+                return getRandomTexture(slideTextures);
             }
             else
             {
@@ -207,28 +210,9 @@ namespace prototype1
 
         private Texture2D getRandomHillTexture()
         {
-            Texture2D hillTex = null;
-
             if (hillTextures.Count > 0)
             {
-                foreach (Texture2D tex in hillTextures)
-                {
-                    if (RandomHandler.GetRandomFloat(1) < 0.01f)
-                    {
-                        hillTex = tex;
-                        break;
-                    }
-                }
-
-
-                if (hillTex != null)
-                {
-                    return hillTex;
-                }
-                else
-                {
-                    return getRandomHillTexture();
-                }
+                return getRandomTexture(hillTextures);
             }
             else
             {
@@ -238,32 +222,19 @@ namespace prototype1
 
         private Texture2D getRandomHoleTexture()
         {
-            Texture2D holeTex = null;
-
             if (holeTextures.Count > 0)
             {
-                foreach (Texture2D tex in holeTextures)
-                {
-                    if (RandomHandler.GetRandomFloat(1) < 0.01f)
-                    {
-                        holeTex = tex;
-                        break;
-                    }
-                }
-
-                if (holeTex != null)
-                {
-                    return holeTex;
-                }
-                else
-                {
-                    return getRandomHoleTexture();
-                }
+                return getRandomTexture(holeTextures);
             }
             else
             {
                 return null;
             }
+        }
+
+        private Texture2D getRandomTexture(List<Texture2D> anyList)
+        {
+            return anyList.ElementAt(RandomHandler.GetRandomInt(anyList.Count - 1));
         }
     }
 }

@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackgroundHandler.cs" />
+    <Compile Include="CameraHandler.cs" />
     <Compile Include="ColorHandler.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="ForegroundHandler.cs" />

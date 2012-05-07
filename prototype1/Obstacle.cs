@@ -19,6 +19,7 @@ namespace prototype1
     {
         private ObstacleType currentType;
         private Rectangle boundingBox;
+        private bool animateOnDeath, readyToAnimate, stayAtFrame;
 
         public Obstacle()
         {
@@ -34,6 +35,24 @@ namespace prototype1
         {
             get { return boundingBox; }
             set { boundingBox = value; }
+        }
+
+        public bool AnimateOnDeath
+        {
+            get { return animateOnDeath; }
+            set { animateOnDeath = value; }
+        }
+
+        public bool ReadyToAnimate
+        {
+            get { return readyToAnimate; }
+            set { readyToAnimate = value; }
+        }
+
+        public bool StayAtFrame
+        {
+            get { return stayAtFrame; }
+            set { stayAtFrame = value; }
         }
     }
 }

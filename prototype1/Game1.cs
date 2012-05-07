@@ -56,6 +56,7 @@ namespace prototype1
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Services.AddService(typeof(SpriteBatch), spriteBatch);
+            Services.AddService(typeof(GraphicsDeviceManager), graphics);
             // TODO: use this.Content to load your game content here
         }
 

@@ -30,13 +30,12 @@ namespace prototype1
         private ForegroundHandler fg;
         private ObstacleHandler obstacleHandler;
         private Enemy enemy;
+        private CameraHandler cameraHandler;
 
         public Controller(Game game) : base(game)
         {
         
         }
-
-
 
         private Texture2D loadTexture(string assetName)
         {
@@ -72,6 +71,7 @@ namespace prototype1
             obstacleHandler = new ObstacleHandler();
             enemy = new Enemy();
             osc = new OSCHandler();
+
             RandomHandler.init();
         }
 
@@ -92,7 +92,7 @@ namespace prototype1
             obstacleHandler.slideTextures.Add(loadTexture("OBSTACLE_Fan1_Scaled_GS"));
 
             // Walls
-            obstacleHandler.wallTextures.Add(loadTexture("OBSTACLE_Wall1_Scaled_GS"));
+            obstacleHandler.wallTextures.Add(loadTexture("OBSTACLE_Wall1_Scaled_GS_Animation"));
         }
 
         private void loadForegroundTextures()
@@ -130,7 +130,12 @@ namespace prototype1
         }
 
         public override void Update(GameTime gameTime)
-        {            
+        {
+            if (cameraHandler != null)
+            {
+                cameraHandler.updateCamera(gameTime, hero.Position);
+            }
+
             obstacleHandler.updateObstacles(gameTime);
             bg.updateBackground(gameTime);
             fg.updateForeground(gameTime);
@@ -151,17 +156,26 @@ namespace prototype1
 
         private void createObstacle(GameTime gameTime)
         {
-            ObstacleType type = obstacleHandler.generateObstacles(gameTime);
-            Hero.HeroState state = Hero.HeroState.WALKING;
+            Obstacle obs = obstacleHandler.generateObstacles(gameTime);
+            if (obs != null)
+            {
+                Hero.HeroState state = Hero.HeroState.WALKING;
 
-            switch (type) {
-                case ObstacleType.HILL: 
-                case ObstacleType.HOLE: state = Hero.HeroState.JUMPING; break;
-                case ObstacleType.SLIDE: state = Hero.HeroState.SLIDING; break;
-                case ObstacleType.WALL: state = Hero.HeroState.KICKING; break;
+                switch (obs.Type)
+                {
+                    case ObstacleType.HILL:
+                    case ObstacleType.HOLE: state = Hero.HeroState.JUMPING; break;
+                    case ObstacleType.SLIDE: state = Hero.HeroState.SLIDING; break;
+                    case ObstacleType.WALL: state = Hero.HeroState.KICKING; break;
+                }
+
+                hero.startAction(state);
+
+                if (obs.AnimateOnDeath)
+                {
+                    obs.ReadyToAnimate = true;
+                }
             }
-
-            hero.startAction(state);
         }
 
         private void updateAllSprites()
@@ -214,24 +228,32 @@ namespace prototype1
         public override void Draw(GameTime gameTime)
         {
             SpriteBatch batch = (SpriteBatch)Game.Services.GetService(typeof(SpriteBatch));
+            GraphicsDeviceManager graphicsManager = (GraphicsDeviceManager)Game.Services.GetService(typeof(GraphicsDeviceManager));
 
-            batch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
+            if (cameraHandler == null)
+            {
+                cameraHandler = new CameraHandler();
+                
+            }
+            batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, null, null, null, null, cameraHandler.getTransformation(graphicsManager.GraphicsDevice));
+
+            //batch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
             bg.drawBackground(batch, gameTime);
-            batch.End();
+            //batch.End();
 
-            batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+           // batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
             fg.drawForeground(batch, gameTime);
-            batch.End();
+           // batch.End();
 
-            batch.Begin();
-            obstacleHandler.drawObstacles(batch);
-            batch.End();
+           // batch.Begin();
+            obstacleHandler.drawObstacles(batch, gameTime);
+           // batch.End();
 
-            batch.Begin();
+          //  batch.Begin();
             hero.drawHero(batch, gameTime);
-            batch.End();
+          //  batch.End();
 
-            batch.Begin();
+          //  batch.Begin();
             enemy.drawEnemy(batch, gameTime);
             batch.End();
  
