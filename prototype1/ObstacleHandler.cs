@@ -169,6 +169,7 @@ namespace prototype1
                 newObs.Active = true;
 
                 newObs.ReadyToAnimate = false;
+                newObs.StayAtFrame = false;
                 if (newObs.AnimateOnDeath != true)
                 {
                     newObs.AnimateOnDeath = false;

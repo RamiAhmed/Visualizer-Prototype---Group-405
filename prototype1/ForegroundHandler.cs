@@ -39,7 +39,7 @@ namespace prototype1
 
         // The Mask
         public Texture2D maskTex;
-        private Sprite mask;
+        private Sprite connectorMask;
         private int maskWidth = 40;
         private int maskSpeed = 150;
 
@@ -82,7 +82,7 @@ namespace prototype1
                 createConnector();
             }
 
-            if (mask == null)
+            if (connectorMask == null)
             {
                 createMask();
             }
@@ -99,35 +99,35 @@ namespace prototype1
 
         private void createMask()
         {
-            if (mask == null)
+            if (connectorMask == null)
             {
-                mask = new Sprite();
+                connectorMask = new Sprite();
 
-                mask.Texture = maskTex;
-                mask.Width = maskWidth;
-                mask.Height = mask.Texture.Height;
+                connectorMask.Texture = maskTex;
+                connectorMask.Width = maskWidth;
+                connectorMask.Height = connectorMask.Texture.Height;
 
-                mask.Speed = 0.5f;
-                mask.Color = Color.White;
-                mask.LayerDepth = 0f;
+                connectorMask.Speed = 0.5f;
+                connectorMask.Color = Color.White;
+                connectorMask.LayerDepth = 0.2f + RandomHandler.GetRandomFloat(0.001f);
 
-                mask.Active = true;
+                connectorMask.Active = true;
 
-                mask.Move(sinusoidX, foregroundY);
+                connectorMask.Move(sinusoidX, foregroundY);
             }
         }
 
         private void drawMask(SpriteBatch batch, GameTime gameTime)
         {
-            if (mask != null && mask.Texture != null && mask.Active)
+            if (connectorMask != null && connectorMask.Texture != null && connectorMask.Active)
             {
-                int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * maskSpeed * mask.Speed) % 1800;
+                int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * maskSpeed * connectorMask.Speed) % 1800;
 
-                Rectangle maskCycle = new Rectangle(animationX, 0, mask.Width, mask.Height);
-                Rectangle maskRect = new Rectangle((int)mask.Position.X, (int)mask.Position.Y,
-                                                    mask.Width, mask.Height);
+                Rectangle maskCycle = new Rectangle(animationX, 0, connectorMask.Width, connectorMask.Height);
+                Rectangle maskRect = new Rectangle((int)connectorMask.Position.X, (int)connectorMask.Position.Y,
+                                                    connectorMask.Width, connectorMask.Height);
 
-                batch.Draw(mask.Texture, maskRect, maskCycle, mask.Color, 0f, new Vector2(0, 0), SpriteEffects.None, mask.LayerDepth);
+                batch.Draw(connectorMask.Texture, maskRect, maskCycle, connectorMask.Color, 0f, new Vector2(0, 0), SpriteEffects.None, connectorMask.LayerDepth);
             }
         }
 
@@ -253,11 +253,11 @@ namespace prototype1
                     float layerDepth = 0f;
                     switch (i)
                     {
-                        case 1: layerDepth = 0.9f; break;
-                        case 2: layerDepth = 0.5f; break;
-                        case 3: layerDepth = 0.1f; break;
+                        case 1: layerDepth = 0.0095f; break;
+                        case 2: layerDepth = 0.0094f; break;
+                        case 3: layerDepth = 0.0093f; break;
                     }
-                    sinusoid.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.01f);
+                    sinusoid.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.001f);
 
                     sinusoidSprites.Add(sinusoid);
                 }

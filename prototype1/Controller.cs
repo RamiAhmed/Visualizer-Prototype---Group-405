@@ -184,7 +184,7 @@ namespace prototype1
 
             allSprites.AddRange(obstacleHandler.obstacleSprites);
             allSprites.AddRange(fg.sinusoidSprites);
-            allSprites.AddRange(bg.maskSprites);
+            allSprites.AddRange(bg.bgMaskSprites);
             allSprites.AddRange(bg.bgSprites);
             //allSprites.Add(hero);
 
