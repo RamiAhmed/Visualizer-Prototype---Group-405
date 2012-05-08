@@ -26,6 +26,7 @@ namespace prototype1
         private int obstacleCreationFrequency = 5000; // every nth millisecond
         private long lastObstacleCreation = 0;
         private float obstacleAnimSpeed = 5f;
+        private float obstacleStartWait = 10f;
 
         public ObstacleHandler()
         {
@@ -96,13 +97,15 @@ namespace prototype1
         {
             Obstacle newObs = null;
             long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
-            if (currentMilliseconds - lastObstacleCreation > obstacleCreationFrequency)
+            if (currentMilliseconds > obstacleStartWait * 1000f)
             {
-                lastObstacleCreation = currentMilliseconds;
+                if (currentMilliseconds - lastObstacleCreation > obstacleCreationFrequency)
+                {
+                    lastObstacleCreation = currentMilliseconds;
 
-                newObs = createObstacle();
+                    newObs = createObstacle();
+                }
             }
-
             return newObs;
         }
 

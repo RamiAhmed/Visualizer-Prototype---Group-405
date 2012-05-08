@@ -21,6 +21,9 @@ namespace prototype1
         public Texture2D shipCrashTex;
         private Sprite crashingShip;
         private float crashingShipAnimSpeed = 7.5f;
+        private bool landHero = false;
+        private bool heroStartPositionSet = false;
+        private Vector2 heroStartIntroPosition = new Vector2(0, 0);
 
         // Position & scale
         private Vector2 heroStartPosition = new Vector2(350, 385);
@@ -51,7 +54,7 @@ namespace prototype1
 
         public void createHero()
         {
-            this.Move(heroStartPosition);
+            this.Move(heroStartIntroPosition);
             this.Width = 100;
             this.Height = 100;
             this.Texture = heroTex;
@@ -64,6 +67,25 @@ namespace prototype1
         {
             updateJump();
             this.Color = ColorHandler.getCurrentColor();
+
+            if (GameStateHandler.CurrentState == GameState.RUNNING)
+            {
+                if (this.CurrentState == HeroState.WALKING) 
+                {
+                    float tolerance = 50f;
+                    if (Math.Abs(this.Position.X - heroStartPosition.X) < tolerance &&
+                        Math.Abs(this.Position.Y - heroStartPosition.Y) < tolerance)
+                    {
+
+                    this.Move(this.Position.X + RandomHandler.GetRandomFloat(-1f, 1f), 
+                              this.Position.Y + RandomHandler.GetRandomFloat(-1f, 1f));
+                    }
+                    else 
+                    {
+                        this.Move(heroStartPosition);
+                    }
+                }
+            }
         }
 
         private void startIntroSequence()
@@ -80,7 +102,7 @@ namespace prototype1
             crashingShip.LayerDepth = 0.25f;
             crashingShip.ScaleFactor = 0.5f;
 
-            crashingShip.Move(-crashingShip.Width, 15);
+            crashingShip.Move(-crashingShip.Width, 0);
 
             crashingShip.Active = true;
         }
@@ -93,19 +115,22 @@ namespace prototype1
                 return;
             }
 
-            crashingShip.Move(crashingShip.Position.X + crashingShip.Speed, crashingShip.Position.Y + RandomHandler.GetRandomFloat(-2.5f, 4f));
+            if (crashingShip.Active)
+            {          
+                crashingShip.Move(crashingShip.Position.X + crashingShip.Speed, crashingShip.Position.Y + RandomHandler.GetRandomFloat(-2.5f, 4f));
 
-            int animationX = (int)(time.TotalGameTime.TotalSeconds * crashingShipAnimSpeed) % 4;
-            Rectangle animCycle = new Rectangle(animationX * crashingShip.Width, 0, 
-                                            crashingShip.Width, crashingShip.Height);
+                int animationX = (int)(time.TotalGameTime.TotalSeconds * crashingShipAnimSpeed) % 4;
+                Rectangle animCycle = new Rectangle(animationX * crashingShip.Width, 0,
+                                                crashingShip.Width, crashingShip.Height);
 
-            batch.Draw(crashingShip.Texture, crashingShip.Position, animCycle, crashingShip.Color, 0f, new Vector2(0, 0), crashingShip.ScaleFactor, SpriteEffects.None, crashingShip.LayerDepth);
+                batch.Draw(crashingShip.Texture, crashingShip.Position, animCycle, crashingShip.Color, 0f, new Vector2(0, 0), crashingShip.ScaleFactor, SpriteEffects.None, crashingShip.LayerDepth);
 
-            if (crashingShip.Position.X > Controller.TOTAL_WIDTH)
-            {
-                crashingShip.Active = false;
-                GameStateHandler.CurrentState = GameState.RUNNING;
-                return;
+                if (crashingShip.Position.X > Controller.TOTAL_WIDTH)
+                {
+                    crashingShip.Active = false;
+                    GameStateHandler.CurrentState = GameState.RUNNING;
+                    return;
+                }
             }
         }
 
@@ -139,6 +164,42 @@ namespace prototype1
                 if (GameStateHandler.CurrentState == GameState.STARTING)
                 {
                     drawIntroSequence(batch, gameTime);
+
+                    if (crashingShip.Position.X > 0)
+                    {
+                        int yPos = this.Height * 7;
+                        walkcycleSpeed = 400;
+
+                        if (this.Position.Y > heroStartPosition.Y)
+                        {
+                            if (!heroStartPositionSet) 
+                            {
+                                heroStartPositionSet = true;
+                                this.Move(heroStartPosition);
+                                Console.WriteLine("Moving hero to (run) " + heroStartPosition.ToString());
+
+                                currentFrame = 0;
+                            }
+
+                            walkcycleSpeed = 375;
+                            yPos = this.Height * 8;
+
+                            if (currentFrame > 8)
+                            {
+                                GameStateHandler.CurrentState = GameState.RUNNING;
+                            }
+                        }
+                        else
+                        {
+                            this.Move(this.Position.X + 3f, this.Position.Y + 4f);
+                        }
+
+                        Rectangle animcycle = new Rectangle(getCurrentFrame(gameTime) * this.Width, yPos, this.Width, this.Height);
+
+                        batch.Draw(this.Texture, this.Position, animcycle, this.Color, 0f, 
+                                new Vector2(0, 0), heroScale, SpriteEffects.None, 0f);
+                    }
+                                       
                 }
                 else if (GameStateHandler.CurrentState == GameState.RUNNING)
                 {
@@ -175,11 +236,6 @@ namespace prototype1
 
                     batch.Draw(this.Texture, this.Position, animcycle, this.Color, 0f, new Vector2(0, 0), heroScale, SpriteEffects.None, 0f);
                 }
-            }
-            else
-            {
-                this.Move(heroStartPosition);
-                this.Active = true;
             }
         }
 

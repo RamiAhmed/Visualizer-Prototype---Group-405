@@ -17,7 +17,7 @@ namespace prototype1
     {
         private Texture2D _texture;
         private Vector2 _position;
-        private float _speed, _layer, _scaleFactor;
+        private float _speed, _layer, _scaleFactor, _rotation;
         private bool _active;
         private Color _color;
         private int _width, _height;
@@ -63,6 +63,12 @@ namespace prototype1
         public void Move(float x, float y)
         {
             this.Position = new Vector2(x, y);
+        }
+
+        public float Rotation
+        {
+            get { return _rotation; }
+            set { _rotation = value; }
         }
 
         public Texture2D Texture

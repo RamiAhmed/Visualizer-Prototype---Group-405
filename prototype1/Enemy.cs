@@ -24,6 +24,8 @@ namespace prototype1
         private long lastEnemyCreation = 0;
         private int enemyCreationSpeed = 5000;
 
+        private float enemyStartWait = 3f;
+
         // Getters & Setters
         //private Rectangle boundingBox;
 
@@ -34,33 +36,36 @@ namespace prototype1
         public void updateEnemy(GameTime gameTime)
         {
             long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
-            if (currentMilliseconds - lastEnemyCreation > enemyCreationSpeed)
+            if (currentMilliseconds > enemyStartWait * 1000f)
             {
-                lastEnemyCreation = currentMilliseconds;
-                createEnemy();
-            }
-
-            int enemySpritesCount = enemySprites.Count;
-            if (enemySpritesCount > 0)
-            {                
-                for (int i = 0; i < enemySpritesCount; i++)
+                if (currentMilliseconds - lastEnemyCreation > enemyCreationSpeed)
                 {
-                    Enemy enemy = enemySprites.ElementAt(i);
-                    if (enemy.Active)
-                    {
-                        enemy.Move(enemy.Position.X + enemy.Speed, enemy.Position.Y + RandomHandler.GetRandomFloat(-1, 1));
-                       // enemy.BoundingBox = new Rectangle((int)enemy.Position.X, (int)enemy.Position.Y, enemy.Width, enemy.Height);
-                        if (enemy.Position.X > 500)
-                        {
-                            removeEnemy(enemy);
-                        }
-                    }
-                    else
-                    {
-                        enemySprites.RemoveAt(i);
+                    lastEnemyCreation = currentMilliseconds;
+                    createEnemy();
+                }
 
-                        i--;
-                        enemySpritesCount--;
+                int enemySpritesCount = enemySprites.Count;
+                if (enemySpritesCount > 0)
+                {
+                    for (int i = 0; i < enemySpritesCount; i++)
+                    {
+                        Enemy enemy = enemySprites.ElementAt(i);
+                        if (enemy.Active)
+                        {
+                            enemy.Move(enemy.Position.X + enemy.Speed, enemy.Position.Y + RandomHandler.GetRandomFloat(-1, 1));
+                            // enemy.BoundingBox = new Rectangle((int)enemy.Position.X, (int)enemy.Position.Y, enemy.Width, enemy.Height);
+                            if (enemy.Position.X > 500)
+                            {
+                                removeEnemy(enemy);
+                            }
+                        }
+                        else
+                        {
+                            enemySprites.RemoveAt(i);
+
+                            i--;
+                            enemySpritesCount--;
+                        }
                     }
                 }
             }

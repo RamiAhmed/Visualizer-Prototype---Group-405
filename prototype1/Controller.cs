@@ -31,6 +31,7 @@ namespace prototype1
         private ObstacleHandler obstacleHandler;
         private Enemy enemy;
         private CameraHandler cameraHandler;
+        private ItemsHandler itemsHandler;
 
         public Controller(Game game) : base(game)
         {
@@ -60,6 +61,7 @@ namespace prototype1
             loadForegroundTextures();
             loadBackgroundTextures();
             loadEnemyTextures();
+            loadItemsTextures();
 
             base.LoadContent();
         }
@@ -70,6 +72,7 @@ namespace prototype1
             bg = new BackgroundHandler();
             fg = new ForegroundHandler();
             obstacleHandler = new ObstacleHandler();
+            itemsHandler = new ItemsHandler();
             enemy = new Enemy();
             osc = new OSCHandler();
 
@@ -82,6 +85,39 @@ namespace prototype1
         private void loadEnemyTextures()
         {
             enemy.enemyTextures.Add(loadTexture("Sheep_Anim_GS"));
+        }
+
+        private void loadItemsTextures()
+        {
+            int i = 0, j = 1, loops = 4;
+            string itemAssetName = "ITEM_", 
+                   itemType = "Bolt";
+
+            for (i = 0; i < 5; i++)
+            {
+                switch (i)
+                {
+                    case 1: itemType = "Cog"; break;
+                    case 2: itemType = "Wrench"; break;
+                    case 3: itemType = "Hammer"; 
+                            loops = 1; 
+                            break;
+                    case 4: itemType = "Screwdriver"; 
+                            loops = 1; 
+                            break;
+                }
+
+                        
+                for (j = 1; j <= loops; j++)
+                {
+                    itemAssetName += itemType;
+                    itemAssetName += j.ToString();
+                    itemAssetName += "_Scaled_Animation";
+                    itemsHandler.itemTextures.Add(loadTexture(itemAssetName));
+
+                    itemAssetName = "ITEM_";
+                }
+            }
         }
 
         private void loadObstacleTextures()
@@ -148,6 +184,7 @@ namespace prototype1
                 obstacleHandler.updateObstacles(gameTime);
                 hero.updateHero(gameTime);
                 enemy.updateEnemy(gameTime);
+                itemsHandler.updateItems(gameTime);
 
                 updateAllSprites();
 
@@ -253,6 +290,7 @@ namespace prototype1
             {
                 obstacleHandler.drawObstacles(batch, gameTime);
                 enemy.drawEnemy(batch, gameTime);
+                itemsHandler.drawItems(batch, gameTime);
             }
             batch.End();
  
@@ -285,6 +323,12 @@ namespace prototype1
             }
             bg.backgroundTextures.Clear();
             bg.bgSprites.Clear();
+
+            foreach (Texture2D itemTexture in itemsHandler.itemTextures)
+            {
+                itemTexture.Dispose();
+            }
+            itemsHandler.itemSprites.Clear();
 
             osc.stopOSCServer();
 

@@ -126,6 +126,7 @@
     <Compile Include="ForegroundHandler.cs" />
     <Compile Include="GameStateHandler.cs" />
     <Compile Include="Hero.cs" />
+    <Compile Include="ItemsHandler.cs" />
     <Compile Include="Obstacle.cs" />
     <Compile Include="ObstacleHandler.cs" />
     <Compile Include="OSCHandler.cs" />

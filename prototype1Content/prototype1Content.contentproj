@@ -231,6 +231,78 @@
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ITEM_Bolt1_Scaled_Animation.png">
+      <Name>ITEM_Bolt1_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Bolt2_Scaled_Animation.png">
+      <Name>ITEM_Bolt2_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Bolt3_Scaled_Animation.png">
+      <Name>ITEM_Bolt3_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Bolt4_Scaled_Animation.png">
+      <Name>ITEM_Bolt4_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Cog1_Scaled_Animation.png">
+      <Name>ITEM_Cog1_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Cog2_Scaled_Animation.png">
+      <Name>ITEM_Cog2_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Cog3_Scaled_Animation.png">
+      <Name>ITEM_Cog3_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Cog4_Scaled_Animation.png">
+      <Name>ITEM_Cog4_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Hammer1_Scaled_Animation.png">
+      <Name>ITEM_Hammer1_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Screwdriver1_Scaled_Animation.png">
+      <Name>ITEM_Screwdriver1_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Wrench1_Scaled_Animation.png">
+      <Name>ITEM_Wrench1_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Wrench2_Scaled_Animation.png">
+      <Name>ITEM_Wrench2_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Wrench3_Scaled_Animation.png">
+      <Name>ITEM_Wrench3_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="ITEM_Wrench4_Scaled_Animation.png">
+      <Name>ITEM_Wrench4_Scaled_Animation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

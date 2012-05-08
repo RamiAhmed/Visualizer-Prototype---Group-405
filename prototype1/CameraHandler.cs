@@ -20,8 +20,9 @@ namespace prototype1
         private float _rotation, _zoom;
         private CameraState _currentState;
 
-        private int lastZoom = 0, zoomIntervals = 10; // every nth second
+        private int lastZoom = 0, zoomIntervals = 25; // every nth second
         private float maxZoom = 4f, defaultZoom = 1f, zoomIncremental = 0.02f;
+        private float yZoom = 30f, xZoom = 13.75f;
 
         public Vector2 defaultCameraPosition = new Vector2(Controller.TOTAL_WIDTH / 4, Controller.TOTAL_HEIGHT / 4);
 
@@ -31,7 +32,8 @@ namespace prototype1
         {
             this.Zoom = defaultZoom;
             this.Rotation = 0.0f;
-            this.Position = defaultCameraPosition;
+            this.Position = defaultCameraPosition;  
+                                                  
             this.CurrentState = CameraState.IDLE;
         }
 
@@ -44,23 +46,21 @@ namespace prototype1
                 {
                     Console.WriteLine("Zooming in");
                     lastZoom = currentSeconds;
-                    //this.Move(heroPosition);
                     this.Zoom = defaultZoom;
                     this.CurrentState = CameraState.ZOOMING_IN;
+
                 }
             }
             else if (this.CurrentState == CameraState.ZOOMING_IN) 
             {
-                if (this.Zoom <= maxZoom)
+                if (this.Zoom < maxZoom)
                 {
-                    this.Move(this.Position.X, this.Position.Y + 0.75f);
+                    this.Move(this.Position.X - xZoom * zoomIncremental, this.Position.Y + yZoom * zoomIncremental);
                     this.Zoom += zoomIncremental;
                 }
                 else
                 {
                     Console.WriteLine("Zooming out");
-                    //this.Position = defaultCameraPosition;
-                    //this.Zoom = defaultZoom;
                     this.CurrentState = CameraState.ZOOMING_OUT;
                 }
             }
@@ -68,11 +68,12 @@ namespace prototype1
             {
                 if (this.Zoom > defaultZoom)
                 {
-                    this.Move(this.Position.X, this.Position.Y - 0.75f);
+                    this.Move(this.Position.X + xZoom * zoomIncremental, this.Position.Y - yZoom * zoomIncremental);
                     this.Zoom -= zoomIncremental;
                 }
                 else
                 {
+                    //this.Move(defaultCameraPosition);
                     Console.WriteLine("Done zooming, back at default");
                     this.CurrentState = CameraState.IDLE;
                 }
