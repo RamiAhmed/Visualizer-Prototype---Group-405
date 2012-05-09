@@ -122,12 +122,17 @@ namespace prototype1
             if (connectorMask != null && connectorMask.Texture != null && connectorMask.Active)
             {
                 int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * maskSpeed * connectorMask.Speed) % 1800;
+                if (!Hero.heroReady)
+                {
+                    animationX = 0;
+                }
 
                 Rectangle maskCycle = new Rectangle(animationX, 0, connectorMask.Width, connectorMask.Height);
                 Rectangle maskRect = new Rectangle((int)connectorMask.Position.X, (int)connectorMask.Position.Y,
                                                     connectorMask.Width, connectorMask.Height);
 
-                batch.Draw(connectorMask.Texture, maskRect, maskCycle, connectorMask.Color, 0f, new Vector2(0, 0), SpriteEffects.None, connectorMask.LayerDepth);
+                batch.Draw(connectorMask.Texture, maskRect, maskCycle, connectorMask.Color, 0f, 
+                        new Vector2(0, 0), SpriteEffects.None, connectorMask.LayerDepth);
             }
         }
 
@@ -156,6 +161,10 @@ namespace prototype1
             if (connector != null && connector.Texture != null && connector.Active)
             {
                 int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * connectorSpeed * connector.Speed) % 1800;
+                if (!Hero.heroReady)
+                {
+                    animationX = 0;
+                }
 
                 Rectangle connectorCycle = new Rectangle(animationX, 0, connector.Width, connector.Height);
                 Rectangle connectRect = new Rectangle((int)connector.Position.X, (int)connector.Position.Y,
@@ -188,6 +197,10 @@ namespace prototype1
             if (surface != null && surface.Texture != null && surface.Active)
             {
                 int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * surfaceMovementSpeed * surface.Speed) % 1800;
+                if (!Hero.heroReady)
+                {
+                    animationX = 0;
+                }
 
                 Rectangle animationCycle = new Rectangle(animationX, 0, surface.Width, surface.Height);
                 Rectangle surfaceRect = new Rectangle((int)surface.Position.X, (int)surface.Position.Y,
@@ -211,6 +224,15 @@ namespace prototype1
                     middleStream.Width = middleWidth;
                     middleStream.Height = middleStream.Texture.Height;
 
+                    float layerDepth = 0f;
+                    switch (i)
+                    {
+                        case 1: layerDepth = 0.0095f; break;
+                        case 2: layerDepth = 0.0094f; break;
+                        case 3: layerDepth = 0.0093f; break;
+                    }
+                    middleStream.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.0001f);
+
                     middleStream.Move(middleX, foregroundY);
                     middleStream.Active = true;
 
@@ -226,6 +248,11 @@ namespace prototype1
                 if (middleSprite.Active)
                 {
                     int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * middleUpdateSpeed * middleSprite.Speed) % 1800;
+                    if (!Hero.heroReady)
+                    {
+                        animationX = 0;
+                    }
+
                     Rectangle middleAnimation = new Rectangle(animationX, 0, middleSprite.Width, middleSprite.Height);
 
                     batch.Draw(middleSprite.Texture, middleSprite.Position, middleAnimation, middleSprite.Color);
@@ -257,7 +284,7 @@ namespace prototype1
                         case 2: layerDepth = 0.0094f; break;
                         case 3: layerDepth = 0.0093f; break;
                     }
-                    sinusoid.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.001f);
+                    sinusoid.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.0001f);
 
                     sinusoidSprites.Add(sinusoid);
                 }
@@ -273,7 +300,11 @@ namespace prototype1
                     if (sinusoid.Active)
                     {
                         int animationX = (int)(gameTime.TotalGameTime.TotalSeconds * sinusoidUpdateSpeed * sinusoid.Speed) % 1800;
-                        
+                        if (!Hero.heroReady)
+                        {
+                            animationX = 0;
+                        }
+
                         Rectangle sinusoidAnimation = new Rectangle(animationX, 0, sinusoid.Width, sinusoid.Height);
                         Rectangle sinusoidRect = new Rectangle((int)sinusoid.Position.X, (int)sinusoid.Position.Y,
                                                                 sinusoid.Width, sinusoid.Height);

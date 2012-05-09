@@ -67,7 +67,7 @@ namespace prototype1
 
         public float Rotation
         {
-            get { return _rotation; }
+            get { return MathHelper.ToRadians(_rotation); }
             set { _rotation = value; }
         }
 

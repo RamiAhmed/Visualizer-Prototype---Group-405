@@ -135,6 +135,7 @@
     <Compile Include="Game1.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="RandomHandler.cs" />
+    <Compile Include="SpaceshipHandler.cs" />
     <Compile Include="Sprite.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -52,8 +52,7 @@ namespace prototype1
         protected override void LoadContent()
         {
             hero = new Hero();
-            hero.heroTex = loadTexture("Rami_Anim_GS");
-            hero.shipCrashTex = loadTexture("ramiBotShipCrash");
+            loadHeroTextures();
 
             lateInit();
 
@@ -62,6 +61,8 @@ namespace prototype1
             loadBackgroundTextures();
             loadEnemyTextures();
             loadItemsTextures();
+
+            itemsHandler.createItem();
 
             base.LoadContent();
         }
@@ -79,7 +80,17 @@ namespace prototype1
             RandomHandler.init();
             ColorHandler.loadColors();
 
-            GameStateHandler.CurrentState = GameState.STARTING; // Change to starting
+            GameStateHandler.CurrentState = GameState.STARTING; 
+        }
+
+        private void loadHeroTextures()
+        {
+            hero.heroTex = loadTexture("Rami_Anim_GS");
+
+            // Spaceship textures
+            hero.shipHandler.shipCrashTex = loadTexture("ramiBotShipCrash");
+            hero.shipHandler.shipRepairTex = loadTexture("ramiBotShipFix");
+            hero.shipHandler.shipTakeOffTex = loadTexture("ramiBotShipTakeoff");
         }
 
         private void loadEnemyTextures()
@@ -178,11 +189,12 @@ namespace prototype1
 
             bg.updateBackground(gameTime);
             fg.updateForeground(gameTime);
+            hero.updateHero(gameTime);
 
             if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
                 obstacleHandler.updateObstacles(gameTime);
-                hero.updateHero(gameTime);
+                
                 enemy.updateEnemy(gameTime);
                 itemsHandler.updateItems(gameTime);
 
@@ -194,6 +206,12 @@ namespace prototype1
                 }
 
                 checkCollision();
+
+                if ((int)gameTime.TotalGameTime.TotalSeconds > 15)
+                {
+                    GameStateHandler.CurrentState = GameState.ENDING;
+                    Console.WriteLine("Ending visualization");
+                }
             }
             base.Update(gameTime);
         }
@@ -276,8 +294,7 @@ namespace prototype1
 
             if (cameraHandler == null)
             {
-                cameraHandler = new CameraHandler();
-                
+                cameraHandler = new CameraHandler();                
             }
 
             batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, null, null, null, null, cameraHandler.getTransformation(graphicsManager.GraphicsDevice));
@@ -285,12 +302,12 @@ namespace prototype1
             bg.drawBackground(batch, gameTime);
             fg.drawForeground(batch, gameTime);
             hero.drawHero(batch, gameTime);
+            itemsHandler.drawItems(batch, gameTime);
 
             if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
                 obstacleHandler.drawObstacles(batch, gameTime);
                 enemy.drawEnemy(batch, gameTime);
-                itemsHandler.drawItems(batch, gameTime);
             }
             batch.End();
  
@@ -300,7 +317,10 @@ namespace prototype1
         protected override void UnloadContent()
         {
             hero.heroTex.Dispose();
-            hero.shipCrashTex.Dispose();
+
+            hero.shipHandler.shipCrashTex.Dispose();
+            hero.shipHandler.shipRepairTex.Dispose();
+            hero.shipHandler.shipTakeOffTex.Dispose();
 
             foreach (Texture2D fgTexture in fg.sinusoidTextures)
             {

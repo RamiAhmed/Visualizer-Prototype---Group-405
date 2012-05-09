@@ -69,14 +69,14 @@ namespace prototype1
                     int animationX = (int)(time.TotalGameTime.TotalSeconds * itemAnimSpeed) % numFrames;
                     Rectangle animCycle = new Rectangle(animationX * item.Width, 0, item.Width, item.Height);
 
-                    batch.Draw(item.Texture, item.Position, animCycle, item.Color, MathHelper.ToRadians(item.Rotation),
+                    batch.Draw(item.Texture, item.Position, animCycle, item.Color, item.Rotation,
                             new Vector2(0, 0), item.ScaleFactor, SpriteEffects.None, item.LayerDepth);
                 }
 
             }
         }
 
-        private void createItem()
+        public void createItem()
         {
             Sprite item = new Sprite();
 
@@ -93,7 +93,7 @@ namespace prototype1
 
             item.Active = true;
 
-            item.Move(Controller.TOTAL_WIDTH + item.Width, 400 + RandomHandler.GetRandomFloat(-25, 25));
+            item.Move(Controller.TOTAL_WIDTH + item.Width, 425 + RandomHandler.GetRandomFloat(-10, 10));
 
             itemSprites.Add(item);
         }

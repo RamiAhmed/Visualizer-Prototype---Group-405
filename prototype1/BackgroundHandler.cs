@@ -71,7 +71,11 @@ namespace prototype1
                     }
                     else
                     {
-                        bgSprite.Move(bgSprite.Position.X - bgSprite.Speed, bgSprite.Position.Y);
+                        if (Hero.heroReady)
+                        {
+                            bgSprite.Move(bgSprite.Position.X - bgSprite.Speed, bgSprite.Position.Y);
+                        }
+                        
                     }
                 }
             }
