@@ -20,9 +20,14 @@ namespace prototype1
         private float _rotation, _zoom;
         private CameraState _currentState;
 
+        private float viewportWidth = 0f,
+                      viewportHeight = 0f;
+
         private int lastZoom = 0, zoomIntervals = 25; // every nth second
         private float maxZoom = 4f, defaultZoom = 1f, zoomIncremental = 0.02f;
         private float yZoom = 30f, xZoom = 13.75f;
+
+        private float lookPosX = 0f, lookPosY = 0f;
 
         public Vector2 defaultCameraPosition = new Vector2(Controller.TOTAL_WIDTH / 4, Controller.TOTAL_HEIGHT / 4);
 
@@ -39,7 +44,13 @@ namespace prototype1
 
         public void updateCamera(GameTime time, Vector2 heroPosition)
         {
-            if (GameStateHandler.CurrentState == GameState.RUNNING)
+            //this.Move(viewportWidth * 0.25f - Mouse.GetState().X, viewportHeight * 0.25f - Mouse.GetState().Y);
+
+            if (GameStateHandler.CurrentState == GameState.STARTING)
+            {
+              
+            }
+            else if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
                 int currentSeconds = (int)time.TotalGameTime.TotalSeconds;
                 if (this.CurrentState == CameraState.IDLE)
@@ -84,11 +95,12 @@ namespace prototype1
         }
 
 
-
-        public void Move(Vector2 position)
+        public void Move(Vector2 normalizedPos)
         {
-            this.Position = position;
+            this.Position += normalizedPos;
         }
+
+
         public void Move(int x, int y)
         {
             this.Position = new Vector2(x, y);
@@ -97,16 +109,25 @@ namespace prototype1
         {
             this.Position = new Vector2(x, y);
         }
-                 
+               
 
         public Matrix getTransformation(GraphicsDevice graphicsDevice)
         {
+            if (viewportHeight == 0) 
+            {
+                viewportHeight = graphicsDevice.Viewport.Height;
+            }
+            if (viewportWidth == 0)
+            {
+                viewportWidth = graphicsDevice.Viewport.Width;
+            }
+
             _transform =  
                          Matrix.CreateTranslation(new Vector3(-this.Position.X, -this.Position.Y, 0)) *
                          Matrix.CreateRotationZ(MathHelper.ToRadians(this.Rotation)) *
                          Matrix.CreateScale(new Vector3(this.Zoom, this.Zoom, 1f)) *
-                         Matrix.CreateTranslation(new Vector3(graphicsDevice.Viewport.Width * 0.5f - this.Position.X * this.Zoom,
-                                                              graphicsDevice.Viewport.Height * 0.5f - this.Position.Y * this.Zoom, 0));
+                         Matrix.CreateTranslation(new Vector3(viewportWidth * 0.5f - this.Position.X * this.Zoom,
+                                                              viewportHeight * 0.5f - this.Position.Y * this.Zoom, 0));
             return _transform;
         }
 

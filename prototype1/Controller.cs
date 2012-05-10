@@ -32,10 +32,12 @@ namespace prototype1
         private Enemy enemy;
         private CameraHandler cameraHandler;
         private ItemsHandler itemsHandler;
+        private Explosion explosion;
+        private SkyHandler skyHandler;
 
         public Controller(Game game) : base(game)
         {
-        
+            Console.WriteLine("Controller instantiated");
         }
 
         private Texture2D loadTexture(string assetName)
@@ -61,6 +63,8 @@ namespace prototype1
             loadBackgroundTextures();
             loadEnemyTextures();
             loadItemsTextures();
+            loadExplosionTexure();
+            loadSkyTexture();
 
             itemsHandler.createItem();
 
@@ -72,15 +76,27 @@ namespace prototype1
             hero.createHero();
             bg = new BackgroundHandler();
             fg = new ForegroundHandler();
+            skyHandler = new SkyHandler();
             obstacleHandler = new ObstacleHandler();
             itemsHandler = new ItemsHandler();
             enemy = new Enemy();
             osc = new OSCHandler();
+            explosion = new Explosion();            
 
             RandomHandler.init();
             ColorHandler.loadColors();
 
             GameStateHandler.CurrentState = GameState.STARTING; 
+        }
+
+        private void loadSkyTexture()
+        {
+            skyHandler.skyTexture = loadTexture("alianBugSwam");
+        }
+
+        private void loadExplosionTexure()
+        {
+            explosion.explosionTexture = loadTexture("Explosion");
         }
 
         private void loadHeroTextures()
@@ -194,9 +210,10 @@ namespace prototype1
             if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
                 obstacleHandler.updateObstacles(gameTime);
-                
+                explosion.updateExplosions(gameTime);
                 enemy.updateEnemy(gameTime);
                 itemsHandler.updateItems(gameTime);
+                skyHandler.updateSky(gameTime);
 
                 updateAllSprites();
 
@@ -205,9 +222,9 @@ namespace prototype1
                     createObstacle(gameTime);
                 }
 
-                checkCollision();
+                checkCollision(gameTime);
 
-                if ((int)gameTime.TotalGameTime.TotalSeconds > 15)
+                if ((int)gameTime.TotalGameTime.TotalSeconds > 60)
                 {
                     GameStateHandler.CurrentState = GameState.ENDING;
                     Console.WriteLine("Ending visualization");
@@ -256,7 +273,7 @@ namespace prototype1
             }
         }
 
-        private void checkCollision()
+        private void checkCollision(GameTime time)
         {
             foreach (Enemy enemySprite in enemy.enemySprites) 
             {
@@ -265,6 +282,7 @@ namespace prototype1
                     if (getIsWithinRange(obstacle.Position.X, enemySprite.Position.X, 50f) &&
                         obstacle.Type != ObstacleType.SLIDE)
                     {
+                        explosion.createExplosion(enemySprite, time);
                         enemy.removeEnemy(enemySprite);
                     }
                     else if (getIsWithinRange(hero.Position.X, enemySprite.Position.X, 50f) &&
@@ -302,12 +320,14 @@ namespace prototype1
             bg.drawBackground(batch, gameTime);
             fg.drawForeground(batch, gameTime);
             hero.drawHero(batch, gameTime);
-            itemsHandler.drawItems(batch, gameTime);
+            itemsHandler.drawItems(batch, gameTime);            
 
             if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
+                explosion.drawExplosions(batch, gameTime);
                 obstacleHandler.drawObstacles(batch, gameTime);
                 enemy.drawEnemy(batch, gameTime);
+                skyHandler.drawSky(batch, gameTime);
             }
             batch.End();
  
