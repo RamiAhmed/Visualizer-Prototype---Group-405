@@ -40,10 +40,13 @@ namespace prototype1
                 Obstacle obstacle = obstacleSprites.ElementAt(i);
                 if (obstacle.Active)
                 {
-                    obstacle.Move(obstacle.Position.X - obstacle.Speed, obstacle.Position.Y);
+                    if (Hero.heroReady)
+                    {
+                        obstacle.Move(obstacle.Position.X - obstacle.Speed, obstacle.Position.Y);
 
-                    obstacle.BoundingBox = new Rectangle((int)obstacle.Position.X, (int)obstacle.Position.Y,
-                                                    obstacle.Width, obstacle.Height);
+                        obstacle.BoundingBox = new Rectangle((int)obstacle.Position.X, (int)obstacle.Position.Y,
+                                                        obstacle.Width, obstacle.Height);
+                    }
                 }
                 else
                 {
@@ -107,6 +110,7 @@ namespace prototype1
                 }
             }
             return newObs;
+            //return createObstacle();
         }
 
         private int getObstacleYOffset(Obstacle obstacle)

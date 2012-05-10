@@ -23,6 +23,8 @@ namespace prototype1
         private float lifeTime = 0.4f; // how many seconds does the explosion live?
         private float animSpeed = 10f;
 
+        private bool debug = false;
+
         public Explosion()
         {
 
@@ -48,7 +50,10 @@ namespace prototype1
             explosion.Active = true;
 
             explosionSprites.Add(explosion);
-            Console.WriteLine("Created new explosion at: " + enemy.Position.ToString());
+            if (debug)
+            {
+                Console.WriteLine("Created new explosion at: " + enemy.Position.ToString());
+            }
         }
 
         public void updateExplosions(GameTime time)

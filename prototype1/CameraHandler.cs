@@ -26,12 +26,12 @@ namespace prototype1
         private int lastZoom = 0, zoomIntervals = 25; // every nth second
         private float maxZoom = 4f, defaultZoom = 1f, zoomIncremental = 0.02f;
         private float yZoom = 30f, xZoom = 13.75f;
-
-        private float lookPosX = 0f, lookPosY = 0f;
-
+        
         public Vector2 defaultCameraPosition = new Vector2(Controller.TOTAL_WIDTH / 4, Controller.TOTAL_HEIGHT / 4);
 
         private enum CameraState { ZOOMING_IN, ZOOMING_OUT, IDLE };
+
+        private bool debug = false;
             
         public CameraHandler()
         {
@@ -45,10 +45,14 @@ namespace prototype1
         public void updateCamera(GameTime time, Vector2 heroPosition)
         {
             //this.Move(viewportWidth * 0.25f - Mouse.GetState().X, viewportHeight * 0.25f - Mouse.GetState().Y);
+            //Vector2 mouseVec = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
+            //Console.WriteLine(mouseVec.ToString());
 
             if (GameStateHandler.CurrentState == GameState.STARTING)
             {
-              
+                //Vector2 lookPos = new Vector2(350, 385);
+                //moveCameraTo(lookPos);
+                //this.Zoom = 1f;             
             }
             else if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
@@ -57,7 +61,10 @@ namespace prototype1
                 {
                     if (currentSeconds - lastZoom > zoomIntervals)
                     {
-                        Console.WriteLine("Zooming in");
+                        if (debug)
+                        {
+                            Console.WriteLine("Zooming in");
+                        }
                         lastZoom = currentSeconds;
                         this.Zoom = defaultZoom;
                         this.CurrentState = CameraState.ZOOMING_IN;
@@ -73,7 +80,10 @@ namespace prototype1
                     }
                     else
                     {
-                        Console.WriteLine("Zooming out");
+                        if (debug)
+                        {
+                            Console.WriteLine("Zooming out");
+                        }
                         this.CurrentState = CameraState.ZOOMING_OUT;
                     }
                 }
@@ -87,20 +97,56 @@ namespace prototype1
                     else
                     {
                         //this.Move(defaultCameraPosition);
-                        Console.WriteLine("Done zooming, back at default");
+                        if (debug)
+                        {
+                            Console.WriteLine("Done zooming, back at default");
+                        }
                         this.CurrentState = CameraState.IDLE;
                     }
                 }
             }
         }
 
+        public void moveCameraTo(Vector2 position)
+        {
+            position = new Vector2(Math.Abs(position.X - (viewportWidth * 0.5f)), 
+                                   Math.Abs(position.Y - (viewportHeight * 0.5f)));
 
+            Vector2 movementVector = Vector2.Zero;
+            float tolerance = 10f,
+                  incremental = 0.5f;
+
+            if (position.X - this.Position.X > tolerance)
+            {
+                movementVector.X += incremental;
+            }
+            if (position.X - this.Position.X < -tolerance)
+            {
+                movementVector.X -= incremental;
+            }
+
+            if (position.Y - this.Position.Y > -tolerance)
+            {
+                movementVector.Y += incremental;
+            }
+            if (position.Y - this.Position.Y < tolerance)
+            {
+                movementVector.Y -= incremental;
+            }
+
+            this.Position += movementVector; 
+        }
+        /*
         public void Move(Vector2 normalizedPos)
         {
             this.Position += normalizedPos;
         }
+        */
 
-
+        public void Move(Vector2 position)
+        {
+            this.Position = position;
+        }
         public void Move(int x, int y)
         {
             this.Position = new Vector2(x, y);
@@ -124,7 +170,7 @@ namespace prototype1
 
             _transform =  
                          Matrix.CreateTranslation(new Vector3(-this.Position.X, -this.Position.Y, 0)) *
-                         Matrix.CreateRotationZ(MathHelper.ToRadians(this.Rotation)) *
+                        // Matrix.CreateRotationZ(MathHelper.ToRadians(this.Rotation)) *
                          Matrix.CreateScale(new Vector3(this.Zoom, this.Zoom, 1f)) *
                          Matrix.CreateTranslation(new Vector3(viewportWidth * 0.5f - this.Position.X * this.Zoom,
                                                               viewportHeight * 0.5f - this.Position.Y * this.Zoom, 0));

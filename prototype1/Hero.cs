@@ -17,7 +17,8 @@ namespace prototype1
     {
         // General stuff
         public Texture2D heroTex;
-        static public bool heroReady = false;       
+        static public bool heroReady = false;
+        private float failureChance = 0.05f;
 
         // Intro & outro stuff
         public Vector2 heroStartIntroPosition = new Vector2(0, 0);
@@ -27,10 +28,6 @@ namespace prototype1
         // Position & scale
         public Vector2 heroStartPosition = new Vector2(350, 385);
         private float heroScale = 1.5f;      
-        
-        // Getters & Setters
-        private HeroState currentState;
-        private float jumpHeight;
 
         // Animation
         private long lastFrame = 0;
@@ -38,15 +35,24 @@ namespace prototype1
         private int walkcycleSpeed = 75; // per nth millisecond (adjusted locally)
         private int amountOfFramesInWalkcycle = 8;
 
+        private long lastItemPickUp = 0;
+        private float pickUpPoseTime = 0.75f;
+
+        private long lastFail = 0;
+        private float failTime = 1f;
+
         // Jumping
         private float defaultJumpHeight = 10f;
         private float superJumpChance = 0.10f;
-        //private float failureChance = 0.05f;
         private float gravity = 0.35f;
         private float introGravity = 0.0225f;
         private float introDefaultJumpHeight = 9f;
 
-        public enum HeroState { WALKING, SUPERJUMPING, JUMPING, SLIDING, KICKING };
+        // Getters & Setters
+        private HeroState currentState;
+        private float jumpHeight;
+
+        public enum HeroState { WALKING, SUPERJUMPING, JUMPING, SLIDING, KICKING, PICKING_UP, FAILING };
 
         public Hero()
         {
@@ -61,6 +67,7 @@ namespace prototype1
            
             this.LayerDepth = 0f;
             this.ScaleFactor = heroScale;
+            this.Rotation = 0f;
             this.Color = Color.Gray;
 
             this.Move(heroStartIntroPosition);
@@ -92,6 +99,36 @@ namespace prototype1
                     else 
                     {
                         this.Move(heroStartPosition);
+                    }
+                }
+                else if (this.CurrentState == HeroState.PICKING_UP)
+                {
+                    long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
+                    if (currentMilliseconds - lastFrame <= pickUpPoseTime * 1000f)
+                    {
+                        this.Move(this.Position.X, this.Position.Y - 1f);
+                    }
+                    else 
+                    {
+                        this.Move(this.Position.X, this.Position.Y + 0.75f);
+                        if (this.Position.Y >= heroStartPosition.Y)
+                        {
+                            this.Move(heroStartPosition);
+                            this.CurrentState = HeroState.WALKING;
+                        }                        
+                    }
+                }
+                else if (this.CurrentState == HeroState.FAILING)
+                {
+                    long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
+                    if (currentMilliseconds - lastFail <= failTime * 1000f)
+                    {
+                       // heroReady = false;
+                    }
+                    else 
+                    {
+                       // heroReady = true;
+                        //this.CurrentState = HeroState.WALKING;                        
                     }
                 }
             }
@@ -194,7 +231,8 @@ namespace prototype1
             {
                 if (this.Active)
                 {
-                    int yPos = 0;
+                    int yPos = 0,
+                        xPos = 0;
                     switch (this.CurrentState)
                     {
                         case HeroState.WALKING:
@@ -203,29 +241,49 @@ namespace prototype1
                             break;
 
                         case HeroState.JUMPING:
-                            yPos = this.Height + 1;
+                            yPos = this.Height;
                             walkcycleSpeed = 100;
                             break;
 
                         case HeroState.SLIDING:
-                            yPos = (this.Height + 1) * 2;
+                            yPos = this.Height * 2;
                             walkcycleSpeed = 125;
                             break;
 
                         case HeroState.KICKING:
-                            yPos = (this.Height + 1) * 4;
+                            yPos = this.Height  * 4;
                             walkcycleSpeed = 85;
                             break;
 
-                        case HeroState.SUPERJUMPING:
-                            yPos = (this.Height + 1) * 6;
-                            walkcycleSpeed = 175;
+                        case HeroState.PICKING_UP:
+                            yPos = this.Height * 5;
+                            xPos = 1;
                             break;
+
+                        case HeroState.FAILING:
+                            yPos = this.Height * 5;
+                            xPos = this.Width;
+                            break;
+
+                        case HeroState.SUPERJUMPING:
+                            yPos = this.Height * 6;
+                            walkcycleSpeed = 175;
+                            break;                        
                     }
 
-                    Rectangle animcycle = new Rectangle(getCurrentFrame(gameTime) * this.Width, yPos, this.Width, this.Height);
+                    Rectangle animcycle;
+                    if (xPos == 0)
+                    {
+                        animcycle = new Rectangle(getCurrentFrame(gameTime) * this.Width, yPos, this.Width, this.Height);
+                    }
+                    else
+                    {
+                        animcycle = new Rectangle(xPos, yPos, this.Width, this.Height);
+                    }
 
-                    batch.Draw(this.Texture, this.Position, animcycle, this.Color, 0f, new Vector2(0, 0), this.ScaleFactor, SpriteEffects.None, this.LayerDepth);
+
+                    batch.Draw(this.Texture, this.Position, animcycle, this.Color, this.Rotation, 
+                        new Vector2(0, 0), this.ScaleFactor, SpriteEffects.None, this.LayerDepth);
                 }
             }
             else if (GameStateHandler.CurrentState == GameState.ENDING)
@@ -242,16 +300,32 @@ namespace prototype1
                 }
             }
         }
-        
 
-        public void startAction(HeroState action)
+        public void startPickUpPose(GameTime time)
         {
-            switch (action)
+            this.CurrentState = HeroState.PICKING_UP;
+            lastItemPickUp = (long)time.TotalGameTime.TotalMilliseconds;
+        }
+
+        public void startAction(HeroState action, GameTime time)
+        {
+           /* if (RandomHandler.GetRandomFloat(1f) < failureChance)
             {
-                case HeroState.SLIDING: startSlide(); break;
-                case HeroState.KICKING: startKick(); break;
-                case HeroState.JUMPING: startJump(); break;
+                if (this.CurrentState == HeroState.WALKING)
+                {
+                    this.CurrentState = HeroState.FAILING;
+                    lastFail = (long)time.TotalGameTime.TotalMilliseconds;
+                }
             }
+            else
+            {*/
+                switch (action)
+                {
+                    case HeroState.SLIDING: startSlide(); break;
+                    case HeroState.KICKING: startKick(); break;
+                    case HeroState.JUMPING: startJump(); break;
+                }
+           // }
         }
 
         private void startKick()

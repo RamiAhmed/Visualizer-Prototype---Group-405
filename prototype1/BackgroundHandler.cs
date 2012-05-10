@@ -16,7 +16,7 @@ namespace prototype1
     class BackgroundHandler 
     {
         // Class lists
-        public List<Sprite> bgSprites = new List<Sprite>();
+        public List<BackgroundObject> bgSprites = new List<BackgroundObject>();
         public List<Texture2D> backgroundTextures = new List<Texture2D>();
         public List<Texture2D> fogTextures = new List<Texture2D>();
 
@@ -31,7 +31,15 @@ namespace prototype1
         private long lastGeneration = 0;
         private int generationSpeed = 250; // every nth millisecond
         //private bool fogCreated = false;
-        private Sprite fog;
+        private BackgroundObject fog;
+
+        // Color stuff
+        private int colorAtXPos = 500;
+        private Color defaultBGObjectColor = Color.Gray;
+
+        // Scale to the beat - stuff
+        private float minScale = 0.5f;
+        private float maxScale = 1.5f;
 
         public BackgroundHandler()
         {
@@ -61,7 +69,7 @@ namespace prototype1
             {
                 for (int i = 0; i < drawableSpritesCount; i++)
                 {
-                    Sprite bgSprite = bgSprites.ElementAt(i);
+                    BackgroundObject bgSprite = bgSprites.ElementAt(i);
                     if (!bgSprite.Active)
                     {
                         bgSprites.RemoveAt(i);
@@ -74,6 +82,20 @@ namespace prototype1
                         if (Hero.heroReady)
                         {
                             bgSprite.Move(bgSprite.Position.X - bgSprite.Speed, bgSprite.Position.Y);
+
+                            if (bgSprite.ScaleToTheBeat != -1f)
+                            {
+                                float scaleFactor = OSCHandler.inLoudness;
+                                if (scaleFactor < minScale)
+                                {
+                                    scaleFactor = minScale;
+                                }
+                                else if (scaleFactor > maxScale)
+                                {
+                                    scaleFactor = maxScale;
+                                }
+                                bgSprite.ScaleFactor = scaleFactor;
+                            }
                         }
                         
                     }
@@ -87,14 +109,14 @@ namespace prototype1
             {
                 drawMask(batch, gameTime);
 
-                foreach (Sprite bgSprite in bgSprites)
+                foreach (BackgroundObject bgSprite in bgSprites)
                 {
                     if (bgSprite.Active)
                     {
                         Color spriteColor = bgSprite.Color;
-                        if (bgSprite.Position.X > 550)
+                        if (bgSprite.Position.X < colorAtXPos - (bgSprite.Width * 0.5f) && spriteColor == defaultBGObjectColor)
                         {
-                            spriteColor = Color.Gray;
+                            bgSprite.Color = ColorHandler.getCurrentColor();
                         }
 
                         if (bgSprite.ScaleFactor == 1f && bgSprite.Speed == 0f)
@@ -162,7 +184,7 @@ namespace prototype1
         private void createFog()
         {
             for (int i = 0; i < 3; i++) {
-                fog = new Sprite();
+                fog = new BackgroundObject();
 
                 fog.Texture = fogTextures[0];
                 fog.Width = fog.Texture.Width;
@@ -189,17 +211,17 @@ namespace prototype1
             }
         }
 
-        private Sprite placeOnRandomLayer(Sprite bgSprite)
+        private BackgroundObject placeOnRandomLayer(BackgroundObject bgObject)
         {
             // Layer 1 is the foremost, layer 3 is the furthest away
             int randomLayer = RandomHandler.GetRandomInt(1, 3);
 
-            bgSprite.Speed = 4 - randomLayer;
+            bgObject.Speed = 4 - randomLayer;
 
             float yPos = yCreationPos[3 - randomLayer],
                   layerDepth = 1f;
 
-            bgSprite.Move(xCreationPos, yPos);
+            bgObject.Move(xCreationPos, yPos);
 
             switch (randomLayer)
             {
@@ -210,30 +232,39 @@ namespace prototype1
                 case 3: layerDepth = 0.9f; 
                         break;
             }
-            bgSprite.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.001f);
-            bgSprite.ScaleFactor = scaleValues[randomLayer-1];
+            bgObject.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.001f);
+            bgObject.ScaleFactor = scaleValues[randomLayer - 1];
 
-            return bgSprite;
+            float scaleFactor = 0f;
+            /*switch (randomLayer)
+            {
+                case 1: scaleFactor = 0.75f; break;
+                case 2: scaleFactor = 1f; break;
+                case 3: scaleFactor = 1.25f; break;                    
+            }*/
+            bgObject.ScaleToTheBeat = 1f;
+
+            return bgObject;
         }
 
         private void generateNewBackgroundObject()
         {
-            Sprite bgObject = new Sprite();
+            BackgroundObject bgObject = new BackgroundObject();
             bgObject.Texture = getRandomBGTexture();
-
-            bgObject.Active = true;
+            
             bgObject.Width = bgObject.Texture.Width;
             bgObject.Height = bgObject.Texture.Height;
-            bgObject.Color = ColorHandler.getCurrentColor();
+            bgObject.Color = defaultBGObjectColor;
 
             bgObject = placeOnRandomLayer(bgObject);
 
+            bgObject.Active = true;
             bgSprites.Add(bgObject);
         }
 
         private Texture2D getRandomBGTexture()
         {
-            Texture2D returnTexture = null;
+            /*Texture2D returnTexture = null;
             foreach (Texture2D texture in backgroundTextures)
             {
                 if (RandomHandler.GetRandomFloat(1) < 0.01f)
@@ -250,7 +281,8 @@ namespace prototype1
             else
             {
                 return returnTexture;
-            }
+            }*/
+            return backgroundTextures.ElementAt(RandomHandler.GetRandomInt(backgroundTextures.Count - 1));
         }
     }
 }

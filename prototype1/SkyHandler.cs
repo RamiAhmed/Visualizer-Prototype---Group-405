@@ -18,7 +18,7 @@ namespace prototype1
         public List<Sprite> skySprites = new List<Sprite>();
         public Texture2D skyTexture;
 
-        private Vector2 skyStartPos = new Vector2(Controller.TOTAL_WIDTH, 75);
+        private Vector2 skyStartPos = new Vector2(0, 75);
         private int numFrames = 4;
         private float skyDefaultMoveSpeed = 1f;
         private float skyDefaultAnimSpeed = 10f;
@@ -46,7 +46,7 @@ namespace prototype1
             skyElement.Color = ColorHandler.getCurrentColor();
             
             skyElement.Active = true;
-            skyElement.Move(skyStartPos);
+            skyElement.Move(-skyElement.Width, skyStartPos.Y);
 
             skySprites.Add(skyElement);
         }
@@ -71,13 +71,13 @@ namespace prototype1
                     Sprite skyElement = skySprites.ElementAt(i);
                     if (skyElement.Active)
                     {
-                        if (skyElement.Position.X < 0 || skyElement.Position.Y < 0)
+                        if (skyElement.Position.X > Controller.TOTAL_WIDTH || skyElement.Position.Y < 0)
                         {
                             skyElement.Active = false;
                         }
                         else
                         {
-                            skyElement.Move(skyElement.Position.X - skyElement.Speed,
+                            skyElement.Move(skyElement.Position.X + skyElement.Speed,
                                             skyElement.Position.Y + RandomHandler.GetRandomFloat(-2.5f, 2.5f));
                         }
                     }

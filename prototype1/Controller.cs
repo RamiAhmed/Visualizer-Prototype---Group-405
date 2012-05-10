@@ -17,14 +17,14 @@ namespace prototype1
 {
     class Controller : DrawableGameComponent
     {
-        /* Public variables */
+        /* Public static variables */
         public static int TOTAL_WIDTH = 1024,
                           TOTAL_HEIGHT = 576;
 
         /* Private variables */
         private List<Sprite> allSprites = new List<Sprite>();
-        private OSCHandler osc;
 
+        private OSCHandler osc;
         private Hero hero;
         private BackgroundHandler bg;
         private ForegroundHandler fg;
@@ -35,22 +35,20 @@ namespace prototype1
         private Explosion explosion;
         private SkyHandler skyHandler;
 
+        private float obstacleCreationChance = 0.2f; // 20 %
+
+        /* SONG HARDCODED PROPERTIES */
+        private float songDuration = 300;
+        private float beatsPerMinute = 100;
+
         public Controller(Game game) : base(game)
         {
             Console.WriteLine("Controller instantiated");
         }
 
-        private Texture2D loadTexture(string assetName)
-        {
-            Texture2D texture = Game.Content.Load<Texture2D>(assetName);
-            if (texture == null)
-            {
-                Console.WriteLine("Error loading texture by asset name: " + assetName);
-            }
-
-            return texture;
-        }
-
+        /*
+         * Loading texture and instantiating classes
+         */
         protected override void LoadContent()
         {
             hero = new Hero();
@@ -78,15 +76,26 @@ namespace prototype1
             fg = new ForegroundHandler();
             skyHandler = new SkyHandler();
             obstacleHandler = new ObstacleHandler();
-            itemsHandler = new ItemsHandler();
-            enemy = new Enemy();
+            itemsHandler = new ItemsHandler(hero);
+            enemy = new Enemy();            
+            explosion = new Explosion();
             osc = new OSCHandler();
-            explosion = new Explosion();            
 
             RandomHandler.init();
             ColorHandler.loadColors();
 
             GameStateHandler.CurrentState = GameState.STARTING; 
+        }
+
+        private Texture2D loadTexture(string assetName)
+        {
+            Texture2D texture = Game.Content.Load<Texture2D>(assetName);
+            if (texture == null)
+            {
+                Console.WriteLine("Error loading texture by asset name: " + assetName);
+            }
+
+            return texture;
         }
 
         private void loadSkyTexture()
@@ -112,6 +121,11 @@ namespace prototype1
         private void loadEnemyTextures()
         {
             enemy.enemyTextures.Add(loadTexture("Sheep_Anim_GS"));
+
+            for (int i = 1; i <= 3; i++) 
+            {
+                enemy.enemyTextures.Add(loadTexture("alianBugType" + i.ToString()));
+            }
         }
 
         private void loadItemsTextures()
@@ -196,6 +210,9 @@ namespace prototype1
             bg.backgroundTextures.Add(loadTexture("Port-Optical1_Scaled_GS"));
         }
 
+        /*
+         * Updating
+         */
         public override void Update(GameTime gameTime)
         {
             if (cameraHandler != null)
@@ -217,14 +234,14 @@ namespace prototype1
 
                 updateAllSprites();
 
-                if (RandomHandler.GetRandomInt(100) < 25)
+                if (RandomHandler.GetRandomFloat(100f) < obstacleCreationChance * 100f)
                 {
                     createObstacle(gameTime);
                 }
 
                 checkCollision(gameTime);
 
-                if ((int)gameTime.TotalGameTime.TotalSeconds > 60)
+                if ((int)gameTime.TotalGameTime.TotalSeconds > songDuration-10)
                 {
                     GameStateHandler.CurrentState = GameState.ENDING;
                     Console.WriteLine("Ending visualization");
@@ -248,7 +265,7 @@ namespace prototype1
                     case ObstacleType.WALL: state = Hero.HeroState.KICKING; break;
                 }
 
-                hero.startAction(state);
+                hero.startAction(state, gameTime);
 
                 if (obs.AnimateOnDeath)
                 {
@@ -305,6 +322,9 @@ namespace prototype1
             return inRange;
         }
         
+        /*
+         * Drawing
+         */
         public override void Draw(GameTime gameTime)
         {
             SpriteBatch batch = (SpriteBatch)Game.Services.GetService(typeof(SpriteBatch));
@@ -334,6 +354,9 @@ namespace prototype1
             base.Draw(gameTime);
         }
 
+        /*
+         * Unloading textures
+         */
         protected override void UnloadContent()
         {
             hero.heroTex.Dispose();

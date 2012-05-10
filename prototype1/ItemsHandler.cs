@@ -24,8 +24,11 @@ namespace prototype1
         private int numFrames = 4;
         private float itemAnimSpeed = 5f;
 
-        public ItemsHandler()
+        private Hero heroRef;
+
+        public ItemsHandler(Hero heroReference)
         {
+            heroRef = heroReference;
         }
 
         public void updateItems(GameTime time)
@@ -47,6 +50,7 @@ namespace prototype1
                     item.Move(item.Position.X - item.Speed, item.Position.Y + RandomHandler.GetRandomFloat(-1.5f, 1.5f));
                     if (item.Position.X - (item.Width * 0.75f) < deathPointX)
                     {
+                        heroRef.startPickUpPose(time);
                         item.Active = false;
                     }
                 }
@@ -88,8 +92,8 @@ namespace prototype1
 
             item.Speed = 1.5f;
             item.LayerDepth = 0.01f;
-            item.ScaleFactor = 1f + RandomHandler.GetRandomFloat(-0.25f, 0.25f);
-            item.Rotation = RandomHandler.GetRandomFloat(-90, 90);
+            item.ScaleFactor = 1.25f + RandomHandler.GetRandomFloat(-0.25f, 0.25f);
+            item.Rotation = RandomHandler.GetRandomFloat(360);
 
             item.Active = true;
 

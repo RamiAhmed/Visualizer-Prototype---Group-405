@@ -16,14 +16,16 @@ namespace prototype1
         private readonly int ServerPort = 12000;
 
         /* Sound properties */
-        public int inAmplitude,
-                    inFrequency,
-                    inPitch,
-                    inBrightness,
-                    inFundamentalFrequency;
-        public float inNoise,
+        static public int inBrightness;
+        static public float inNoise,
                       inPeakAmplitude,
-                      inLoudness;
+                      inLoudness,
+                      inPitch,
+                      inFundamentalFrequency,
+                      inAmplitude;
+
+        // DEBUG
+        private static bool debug = true;
 
         public OSCHandler()
         {
@@ -38,7 +40,10 @@ namespace prototype1
             OscPacket.LittleEndianByteOrder = false;
             sOscServer.Start();
 
-            Console.WriteLine("OSC Client: " + sOscServer.TransmissionType.ToString());
+            if (debug)
+            {
+                Console.WriteLine("OSC Client: " + sOscServer.TransmissionType.ToString());
+            }
         }
 
         public void stopOSCServer()
@@ -46,28 +51,34 @@ namespace prototype1
             sOscServer.Stop();
         }
 
-        void sOscServer_MessageReceived(object sender, OscMessageReceivedEventArgs OSCEvent)
+        private static void sOscServer_MessageReceived(object sender, OscMessageReceivedEventArgs OSCEvent)
         {
-            Console.WriteLine("\nMessage Length: " + OSCEvent.Message.Data.Length);
+            if (debug)
+            {
+                Console.WriteLine("\nMessage Length: " + OSCEvent.Message.Data.Length);
+            }
 
-            inPitch = OSCEvent.Message.At<int>(0);
-            inAmplitude = OSCEvent.Message.At<int>(1);
+            inPitch = OSCEvent.Message.At<float>(0);
+            inAmplitude = OSCEvent.Message.At<float>(1);
             inLoudness = OSCEvent.Message.At<float>(2);
             inBrightness = OSCEvent.Message.At<int>(3);
             inNoise = OSCEvent.Message.At<float>(4);
-            if (OSCEvent.Message.At<int>(5) != 0)
+            if (OSCEvent.Message.At<float>(5) != 0)
             {
-                inFundamentalFrequency = OSCEvent.Message.At<int>(5);
+                inFundamentalFrequency = OSCEvent.Message.At<float>(5);
             }
             inPeakAmplitude = OSCEvent.Message.At<float>(6);
 
-            Console.WriteLine("Pitch: " + inPitch.ToString());
-            Console.WriteLine("Amplitude: " + inAmplitude.ToString());
-            Console.WriteLine("Loudness: " + inLoudness.ToString());
-            Console.WriteLine("Brightness: " + inBrightness.ToString());
-            Console.WriteLine("Noise: " + inNoise.ToString());
-            Console.WriteLine("Fundamental Frequency: " + inFrequency.ToString());
-            Console.WriteLine("Peak amplitude: " + inPeakAmplitude.ToString());
+            if (debug)
+            {
+                Console.WriteLine("Pitch: " + inPitch.ToString());
+                Console.WriteLine("Amplitude: " + inAmplitude.ToString());
+                Console.WriteLine("Loudness: " + inLoudness.ToString());
+                Console.WriteLine("Brightness: " + inBrightness.ToString());
+                Console.WriteLine("Noise: " + inNoise.ToString());
+                Console.WriteLine("Fundamental Frequency: " + inFundamentalFrequency.ToString());
+                Console.WriteLine("Peak amplitude: " + inPeakAmplitude.ToString());
+            }
         }
     }
 }
