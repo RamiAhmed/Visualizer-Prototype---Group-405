@@ -5,7 +5,7 @@ using System.Text;
 
 namespace prototype1
 {
-    public enum GameState { STARTING, RUNNING, ENDING };
+    public enum GameState { STARTING, RUNNING, ENDING, IDLE };
 
     public static class GameStateHandler
     {

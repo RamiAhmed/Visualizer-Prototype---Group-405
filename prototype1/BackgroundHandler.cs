@@ -83,9 +83,13 @@ namespace prototype1
                         {
                             bgSprite.Move(bgSprite.Position.X - bgSprite.Speed, bgSprite.Position.Y);
 
-                            if (bgSprite.ScaleToTheBeat != -1f)
+                            if (bgSprite.IsFog)
                             {
-                                float scaleFactor = OSCHandler.inLoudness;
+                                bgSprite.Color = ColorHandler.getSmoothFogColor();
+                            }
+                            else if (bgSprite.ScaleToTheBeat != -1f)
+                            {
+                                float scaleFactor = bgSprite.ScaleToTheBeat * OSCHandler.inLoudness;
                                 if (scaleFactor < minScale)
                                 {
                                     scaleFactor = minScale;
@@ -204,6 +208,7 @@ namespace prototype1
                 fog.LayerDepth = layerDepth;
                 fog.Speed = 0f;
                 fog.ScaleFactor = 1f;
+                fog.IsFog = true;
 
                 fog.Move(0, 0);
 
@@ -233,16 +238,16 @@ namespace prototype1
                         break;
             }
             bgObject.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.001f);
-            bgObject.ScaleFactor = scaleValues[randomLayer - 1];
+            //bgObject.ScaleFactor = scaleValues[randomLayer - 1];
 
-            float scaleFactor = 0f;
-            /*switch (randomLayer)
+            /*float scaleFactor = 0f;
+            switch (randomLayer)
             {
                 case 1: scaleFactor = 0.75f; break;
                 case 2: scaleFactor = 1f; break;
                 case 3: scaleFactor = 1.25f; break;                    
             }*/
-            bgObject.ScaleToTheBeat = 1f;
+            bgObject.ScaleToTheBeat = scaleValues[randomLayer - 1];
 
             return bgObject;
         }

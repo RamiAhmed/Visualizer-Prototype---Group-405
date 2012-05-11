@@ -23,7 +23,7 @@ namespace prototype1
 
         private int obstacleCreationPointX = 475,
                     obstacleCreationPointY = 540;
-        private int obstacleCreationFrequency = 5000; // every nth millisecond
+        private int obstacleCreationFrequency = 1500; // every nth millisecond
         private long lastObstacleCreation = 0;
         private float obstacleAnimSpeed = 5f;
         private float obstacleStartWait = 10f;
@@ -90,7 +90,8 @@ namespace prototype1
 
                     int yOffset = getObstacleYOffset(obstacle);
 
-                    batch.Draw(obstacle.Texture, obstacle.BoundingBox, animCycle, obstacle.Color, 0f, new Vector2(0, yOffset), SpriteEffects.None, obstacle.LayerDepth);
+                    batch.Draw(obstacle.Texture, obstacle.BoundingBox, animCycle, obstacle.Color, 0f, 
+                            new Vector2(0, yOffset), SpriteEffects.None, obstacle.LayerDepth);
                 }
             }
         }
@@ -106,11 +107,27 @@ namespace prototype1
                 {
                     lastObstacleCreation = currentMilliseconds;
 
-                    newObs = createObstacle();
+                    float freq = OSCHandler.inFundamentalFrequency;
+                    int bright = OSCHandler.inBrightness;
+                    if (freq > 100f && freq < 180f && bright < 400)
+                    {
+                        newObs = createObstacle(ObstacleType.HOLE);
+                    }
+                    else if (freq > 100f && freq < 180f && bright > 400)
+                    {
+                        newObs = createObstacle(ObstacleType.HILL);
+                    }
+                    else if (freq < 100 && bright < 100)
+                    {
+                        newObs = createObstacle(ObstacleType.WALL);
+                    }
+                    else if (freq > 180f && freq < 500f && bright > 500)
+                    {
+                        newObs = createObstacle(ObstacleType.SLIDE);
+                    }
                 }
             }
             return newObs;
-            //return createObstacle();
         }
 
         private int getObstacleYOffset(Obstacle obstacle)
@@ -128,25 +145,30 @@ namespace prototype1
 
         private Obstacle createObstacle()
         {
-            Obstacle newObs = new Obstacle();
-
             ObstacleType obsType = ObstacleType.NULL;
-            int typeOfObstacle = RandomHandler.GetRandomInt(0, 4),
-                newWidth = 0;
-            Texture2D obstacleTexture = null;
+            int typeOfObstacle = RandomHandler.GetRandomInt(0, 4);
             switch (typeOfObstacle)
             {
-                case 0: obstacleTexture = getRandomHoleTexture();
-                        obsType = ObstacleType.HOLE; 
-                        break;
-                case 1: obstacleTexture = getRandomHillTexture();
-                        obsType = ObstacleType.HILL;
-                        break;
-                case 2: obstacleTexture = getRandomSlideTexture();
-                        obsType = ObstacleType.SLIDE;
-                        break;
-                case 3: obstacleTexture = getRandomWallTexture();
-                        obsType = ObstacleType.WALL;
+                case 0: obsType = ObstacleType.HOLE; break;
+                case 1: obsType = ObstacleType.HILL; break;
+                case 2: obsType = ObstacleType.SLIDE; break;
+                case 3: obsType = ObstacleType.WALL; break;
+            }
+            return createObstacle(obsType);
+        }
+
+        private Obstacle createObstacle(ObstacleType obsType)
+        {
+            Obstacle newObs = new Obstacle();
+
+            int newWidth = 0;
+            Texture2D obstacleTexture = null;
+            switch (obsType)
+            {
+                case ObstacleType.HOLE: obstacleTexture = getRandomHoleTexture(); break;
+                case ObstacleType.HILL: obstacleTexture = getRandomHillTexture(); break;
+                case ObstacleType.SLIDE: obstacleTexture = getRandomSlideTexture(); break;
+                case ObstacleType.WALL: obstacleTexture = getRandomWallTexture();
                         newObs.AnimateOnDeath = true;
                         newWidth = 100;
                         break;

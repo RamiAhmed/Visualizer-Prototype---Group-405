@@ -20,6 +20,10 @@ namespace prototype1
         /* Public static variables */
         public static int TOTAL_WIDTH = 1024,
                           TOTAL_HEIGHT = 576;
+        // Settings
+        public static bool IS_FULL_SCREEN = false;
+        public static string PARTICIPANT_ID = "";
+        public static int SCENARIO_NUM = -1;
 
         /* Private variables */
         private List<Sprite> allSprites = new List<Sprite>();
@@ -36,14 +40,28 @@ namespace prototype1
         private SkyHandler skyHandler;
 
         private float obstacleCreationChance = 0.2f; // 20 %
+        private SpriteFont mainFont;
 
         /* SONG HARDCODED PROPERTIES */
-        private float songDuration = 300;
+        private float songDuration = 343;
         private float beatsPerMinute = 100;
+
+        /* TIME LOGGING */
+        private TimeSpan timeOfStart;
 
         public Controller(Game game) : base(game)
         {
             Console.WriteLine("Controller instantiated");
+        }
+
+        private void logTime(String message)
+        {
+            // Write the string to a file.
+            System.IO.StreamWriter file = new System.IO.StreamWriter("c:\\test.log", true); // true == append to file
+            
+            file.WriteLine(message); 
+
+            file.Close();
         }
 
         /*
@@ -63,6 +81,8 @@ namespace prototype1
             loadItemsTextures();
             loadExplosionTexure();
             loadSkyTexture();
+
+            mainFont = Game.Content.Load<SpriteFont>("MainFont");
 
             itemsHandler.createItem();
 
@@ -84,7 +104,44 @@ namespace prototype1
             RandomHandler.init();
             ColorHandler.loadColors();
 
-            GameStateHandler.CurrentState = GameState.STARTING; 
+            GameStateHandler.CurrentState = GameState.IDLE;
+
+            handleSettingsInput();
+        }
+
+        private void handleSettingsInput()
+        {
+            int scenario = -1;
+            while (scenario == -1)
+            {
+                Console.WriteLine("Please input scenario number (0 = complete, 1 = no intro/outro, 2 = no enemies/obstacles)");
+                scenario = Convert.ToInt32(Console.ReadLine());
+            }
+            SCENARIO_NUM = scenario;
+
+            string id = "";
+            while (id == "")
+            {
+                Console.WriteLine("Please input participant ID");
+                id = Console.ReadLine();
+            }
+            PARTICIPANT_ID = id;
+
+            string fullscreen = "";
+            while (fullscreen == "")
+            {
+                Console.WriteLine("Choose FULL SCREEN (y or yes) or WINDOWED (n or no)");
+                fullscreen = Console.ReadLine().ToLower();
+            }
+
+            if (fullscreen == "y" || fullscreen == "yes")
+            {
+                IS_FULL_SCREEN = true;
+            }
+            else if (fullscreen == "n" || fullscreen == "no")
+            {
+                IS_FULL_SCREEN = false;
+            }
         }
 
         private Texture2D loadTexture(string assetName)
@@ -220,30 +277,57 @@ namespace prototype1
                 cameraHandler.updateCamera(gameTime, hero.Position);
             }
 
-            bg.updateBackground(gameTime);
-            fg.updateForeground(gameTime);
-            hero.updateHero(gameTime);
+            if (GameStateHandler.CurrentState == GameState.IDLE)
+            {
+                if (OSCHandler.inAmplitude != 0f && OSCHandler.inBrightness != 0 && OSCHandler.inFundamentalFrequency != 0f &&
+                    OSCHandler.inLoudness != 0f && OSCHandler.inNoise != 0f && OSCHandler.inPeakAmplitude != 0f && OSCHandler.inPitch != 0f &&
+                    PARTICIPANT_ID != "" && SCENARIO_NUM != -1) // Only start when participant ID has been detected and values from Max start coming in
+                {
+                    if (SCENARIO_NUM == 1)
+                    {
+                        GameStateHandler.CurrentState = GameState.RUNNING;
+                    }
+                    else
+                    {
+                        GameStateHandler.CurrentState = GameState.STARTING;
+                    }
+                    timeOfStart = DateTime.Now.TimeOfDay;
+                }
+
+            }
+            else
+            {
+                bg.updateBackground(gameTime);
+                fg.updateForeground(gameTime);
+                hero.updateHero(gameTime);
+            }
 
             if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
-                obstacleHandler.updateObstacles(gameTime);
-                explosion.updateExplosions(gameTime);
-                enemy.updateEnemy(gameTime);
-                itemsHandler.updateItems(gameTime);
+                if (SCENARIO_NUM != 2)
+                {
+                    createObstacle(gameTime);
+                    checkCollision(gameTime);
+                    obstacleHandler.updateObstacles(gameTime);
+                    explosion.updateExplosions(gameTime);
+                    enemy.updateEnemy(gameTime);
+                }
+                else if (SCENARIO_NUM != 1)
+                {
+                    itemsHandler.updateItems(gameTime);
+                }
+
                 skyHandler.updateSky(gameTime);
 
                 updateAllSprites();
-
-                if (RandomHandler.GetRandomFloat(100f) < obstacleCreationChance * 100f)
-                {
-                    createObstacle(gameTime);
-                }
-
-                checkCollision(gameTime);
+                
 
                 if ((int)gameTime.TotalGameTime.TotalSeconds > songDuration-10)
                 {
-                    GameStateHandler.CurrentState = GameState.ENDING;
+                    if (SCENARIO_NUM != 1)
+                    {
+                        GameStateHandler.CurrentState = GameState.ENDING;
+                    }
                     Console.WriteLine("Ending visualization");
                 }
             }
@@ -252,26 +336,45 @@ namespace prototype1
 
         private void createObstacle(GameTime gameTime)
         {
-            Obstacle obs = obstacleHandler.generateObstacles(gameTime);
-            if (obs != null)
+            if (!getIsItemNear(hero))
             {
-                Hero.HeroState state = Hero.HeroState.WALKING;
-
-                switch (obs.Type)
+                Obstacle obs = obstacleHandler.generateObstacles(gameTime);
+                if (obs != null)
                 {
-                    case ObstacleType.HILL:
-                    case ObstacleType.HOLE: state = Hero.HeroState.JUMPING; break;
-                    case ObstacleType.SLIDE: state = Hero.HeroState.SLIDING; break;
-                    case ObstacleType.WALL: state = Hero.HeroState.KICKING; break;
-                }
+                    Hero.HeroState state = Hero.HeroState.WALKING;
 
-                hero.startAction(state, gameTime);
+                    switch (obs.Type)
+                    {
+                        case ObstacleType.HILL:
+                        case ObstacleType.HOLE: state = Hero.HeroState.JUMPING; break;
+                        case ObstacleType.SLIDE: state = Hero.HeroState.SLIDING; break;
+                        case ObstacleType.WALL: state = Hero.HeroState.KICKING; break;
+                    }
 
-                if (obs.AnimateOnDeath)
-                {
-                    obs.ReadyToAnimate = true;
+                    hero.startAction(state, gameTime);
+
+                    if (obs.AnimateOnDeath)
+                    {
+                        obs.ReadyToAnimate = true;
+                    }
                 }
             }
+        }
+
+        private bool getIsItemNear(Hero heroRef)
+        {
+            bool near = false;
+            float range = 100f;
+
+            foreach (Sprite item in itemsHandler.itemSprites)
+            {
+                if (getIsWithinRange(heroRef.Position.X, item.Position.X, range))
+                {
+                    near = true;
+                }
+            }
+
+            return near;
         }
 
         private void updateAllSprites()
@@ -292,20 +395,30 @@ namespace prototype1
 
         private void checkCollision(GameTime time)
         {
-            foreach (Enemy enemySprite in enemy.enemySprites) 
+            if (enemy.enemySprites.Count > 0) 
             {
-                foreach (Obstacle obstacle in obstacleHandler.obstacleSprites)
+                foreach (Enemy enemySprite in enemy.enemySprites)
                 {
-                    if (getIsWithinRange(obstacle.Position.X, enemySprite.Position.X, 50f) &&
-                        obstacle.Type != ObstacleType.SLIDE)
+                    if (getIsWithinRange(hero.Position.X, enemySprite.Position.X, 50f) && enemySprite.Speed > 0f)
+                    {
+                        enemySprite.Speed -= 0.05f;
+                    }
+                    else if (enemySprite.Position.X > enemy.deathPointX)
                     {
                         explosion.createExplosion(enemySprite, time);
                         enemy.removeEnemy(enemySprite);
                     }
-                    else if (getIsWithinRange(hero.Position.X, enemySprite.Position.X, 50f) &&
-                        enemySprite.Speed > 0f)
+
+                    if (obstacleHandler.obstacleSprites.Count > 0)
                     {
-                        enemySprite.Speed -= 0.05f;
+                        foreach (Obstacle obstacle in obstacleHandler.obstacleSprites)
+                        {
+                            if (getIsWithinRange(obstacle.Position.X, enemySprite.Position.X, 50f) && obstacle.Type != ObstacleType.SLIDE)
+                            {
+                                explosion.createExplosion(enemySprite, time);
+                                enemy.removeEnemy(enemySprite);
+                            }
+                        }
                     }
                 }
             }
@@ -314,7 +427,7 @@ namespace prototype1
         private bool getIsWithinRange(float a, float b, float range)
         {
             bool inRange = false;
-            if (Math.Abs(a - b) < range)
+            if (Math.Abs(a - b) <= range)
             {
                 inRange = true;
             }
@@ -334,19 +447,33 @@ namespace prototype1
             {
                 cameraHandler = new CameraHandler();                
             }
-
             batch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, null, null, null, null, cameraHandler.getTransformation(graphicsManager.GraphicsDevice));
 
-            bg.drawBackground(batch, gameTime);
-            fg.drawForeground(batch, gameTime);
-            hero.drawHero(batch, gameTime);
-            itemsHandler.drawItems(batch, gameTime);            
-
-            if (GameStateHandler.CurrentState == GameState.RUNNING)
+            if (GameStateHandler.CurrentState == GameState.IDLE)
             {
-                explosion.drawExplosions(batch, gameTime);
-                obstacleHandler.drawObstacles(batch, gameTime);
-                enemy.drawEnemy(batch, gameTime);
+                string text = "In IDLE mode. \nWaiting for input from Max 6";
+                Vector2 textPos = new Vector2(Controller.TOTAL_WIDTH * 0.5f - (mainFont.MeasureString(text).X * 0.5f), 
+                                              Controller.TOTAL_HEIGHT * 0.5f - (mainFont.MeasureString(text).Y * 0.5f));
+                batch.DrawString(mainFont, text, textPos, Color.WhiteSmoke); 
+            }
+            else 
+            {
+                bg.drawBackground(batch, gameTime);
+                fg.drawForeground(batch, gameTime);
+                hero.drawHero(batch, gameTime);
+                if (SCENARIO_NUM != 1)
+                {
+                    itemsHandler.drawItems(batch, gameTime);
+                }
+            }
+            if (GameStateHandler.CurrentState == GameState.RUNNING)
+            {                
+                if (SCENARIO_NUM != 2)
+                {
+                    explosion.drawExplosions(batch, gameTime);
+                    obstacleHandler.drawObstacles(batch, gameTime);
+                    enemy.drawEnemy(batch, gameTime);
+                }
                 skyHandler.drawSky(batch, gameTime);
             }
             batch.End();
@@ -394,6 +521,9 @@ namespace prototype1
             itemsHandler.itemSprites.Clear();
 
             osc.stopOSCServer();
+
+            timeOfStart = DateTime.Now.TimeOfDay.Subtract(timeOfStart);
+            logTime("ID: " + PARTICIPANT_ID + ", Scenario: " + SCENARIO_NUM.ToString() + " - " + timeOfStart.ToString());
 
             base.UnloadContent();
         }

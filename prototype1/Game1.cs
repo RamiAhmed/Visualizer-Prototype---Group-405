@@ -38,7 +38,7 @@ namespace prototype1
 
             this.IsMouseVisible = true;
             this.IsFixedTimeStep = true;
-            graphics.IsFullScreen = false;
+            //graphics.IsFullScreen = Controller.IS_FULL_SCREEN;
             graphics.PreferredBackBufferHeight = Controller.TOTAL_HEIGHT;
             graphics.PreferredBackBufferWidth = Controller.TOTAL_WIDTH;
             graphics.ApplyChanges();
@@ -85,6 +85,11 @@ namespace prototype1
                 this.Exit();
             }
 
+            if (graphics.IsFullScreen != Controller.IS_FULL_SCREEN)
+            {
+                graphics.IsFullScreen = Controller.IS_FULL_SCREEN;
+                graphics.ApplyChanges();
+            }
             // TODO: Add your update logic here
 
             base.Update(gameTime);

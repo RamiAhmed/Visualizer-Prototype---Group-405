@@ -18,7 +18,7 @@ namespace prototype1
         public List<Texture2D> itemTextures = new List<Texture2D>();
         public List<Sprite> itemSprites = new List<Sprite>();
 
-        private int deathPointX = 350;
+        private int deathPointX = 400;
         private int lastCreation = 0;
         private int creationFrequency = 30; // every nth second
         private int numFrames = 4;

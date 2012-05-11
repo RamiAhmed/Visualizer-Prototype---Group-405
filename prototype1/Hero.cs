@@ -48,6 +48,8 @@ namespace prototype1
         private float introGravity = 0.0225f;
         private float introDefaultJumpHeight = 9f;
 
+        private bool debug = false;
+
         // Getters & Setters
         private HeroState currentState;
         private float jumpHeight;
@@ -78,7 +80,15 @@ namespace prototype1
         {
             if (shipHandler != null)
             {
-                shipHandler.updateSpaceship(gameTime);
+                if (Controller.SCENARIO_NUM != 1)
+                {
+                    shipHandler.updateSpaceship(gameTime);
+                }
+            }
+
+            if (Controller.SCENARIO_NUM == 1 && !heroReady)
+            {
+                heroReady = true;
             }
 
             if (GameStateHandler.CurrentState == GameState.RUNNING)
@@ -110,7 +120,8 @@ namespace prototype1
                     }
                     else 
                     {
-                        this.Move(this.Position.X, this.Position.Y + 0.75f);
+                        float yDiff = Math.Abs(this.Position.Y - heroStartPosition.Y) * 0.01f;
+                        this.Move(this.Position.X, this.Position.Y + 0.75f + yDiff);
                         if (this.Position.Y >= heroStartPosition.Y)
                         {
                             this.Move(heroStartPosition);
@@ -136,7 +147,7 @@ namespace prototype1
 
         private void drawHeroIntro(SpriteBatch batch, GameTime time)
         {
-            if (shipHandler.crashingShip.Position.X > 0)
+            if (shipHandler.crashingShip != null && shipHandler.crashingShip.Position.X > 0)
             {
                 int yPos = this.Height * 7,
                     numFrames = 4;
@@ -150,13 +161,10 @@ namespace prototype1
                         heroLandedTime = (float)time.TotalGameTime.TotalSeconds;
                         this.Move(this.Position.X, heroStartPosition.Y);
                         //Console.WriteLine("Moving hero to (run) " + heroStartPosition.ToString());
-
-                        //currentFrame = 0;
                     }
                     else if ((float)time.TotalGameTime.TotalSeconds - heroLandedTime < 2f && heroLandedTime != -1f) // 2 = how long in seconds will the hero lie down
                     {
                         // Hero is lying on surface
-                        //yPos = this.Height * 7;
                         currentFrame = 7;
                         //Console.WriteLine("Hero stays on frame " + currentFrame.ToString() + " and yPos: " + yPos.ToString());
 
@@ -216,10 +224,13 @@ namespace prototype1
         {
             if (shipHandler != null)
             {
-                shipHandler.drawSpaceship(batch, gameTime);
+                if (Controller.SCENARIO_NUM != 1)
+                {
+                    shipHandler.drawSpaceship(batch, gameTime);
+                }
             }
 
-            if (GameStateHandler.CurrentState == GameState.STARTING)
+            if (GameStateHandler.CurrentState == GameState.STARTING && Controller.SCENARIO_NUM != 1)
             {
                 if (this.Active)
                 {
@@ -286,7 +297,7 @@ namespace prototype1
                         new Vector2(0, 0), this.ScaleFactor, SpriteEffects.None, this.LayerDepth);
                 }
             }
-            else if (GameStateHandler.CurrentState == GameState.ENDING)
+            else if (GameStateHandler.CurrentState == GameState.ENDING && Controller.SCENARIO_NUM != 1)
             {
                 //shipHandler.drawOutroSequence(batch, gameTime);
 
@@ -363,7 +374,10 @@ namespace prototype1
                     if (RandomHandler.GetRandomFloat(1) < superJumpChance)
                     {
                         this.JumpHeight *= RandomHandler.GetRandomFloat(1.25f, 1.5f);
-                        Console.WriteLine("SUPER JUMP!");
+                        if (debug)
+                        {
+                            Console.WriteLine("SUPER JUMP!");
+                        }
                         this.CurrentState = HeroState.SUPERJUMPING;
                     }
                 }

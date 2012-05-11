@@ -17,6 +17,8 @@ namespace prototype1
     {
         private static List<Color> acceptedColors = new List<Color>();
 
+        private static float smoothColor = 0.5f;
+
         public static void loadColors()
         {
             // 12 colors in total
@@ -34,7 +36,7 @@ namespace prototype1
             acceptedColors.Add(new Color(238, 241, 117));   // Sand
             acceptedColors.Add(new Color(246, 245, 0));     // Yellow
             */
-
+            
             acceptedColors.Add(new Color(255, 11, 12));     // Red
             acceptedColors.Add(new Color(244, 71, 18));     // Orange-red
             acceptedColors.Add(new Color(248, 128, 16));    // Orange
@@ -47,6 +49,33 @@ namespace prototype1
             acceptedColors.Add(new Color(166, 21, 134));    // Purple
             acceptedColors.Add(new Color(215, 19, 134));    // Pink
             acceptedColors.Add(new Color(173, 14, 72));     // Pink-red
+             
+        }
+
+
+        public static Color getSmoothFogColor()
+        {
+            float incremental = 0.001f;
+            float amplitude = OSCHandler.inAmplitude;
+            if (amplitude > 0)
+            {
+                smoothColor += incremental;
+            }
+            else
+            {
+                smoothColor -= (incremental * 0.5f);
+            }
+
+            if (smoothColor < 0.1f)
+            {
+                smoothColor = 0.1f;
+            }
+            else if (smoothColor > 0.9f)
+            {
+                smoothColor = 0.9f;
+            }
+
+            return new Color(smoothColor, smoothColor, smoothColor);
         }
 
         public static Color getCurrentColor()

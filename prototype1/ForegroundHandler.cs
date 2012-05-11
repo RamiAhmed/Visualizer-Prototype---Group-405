@@ -227,9 +227,9 @@ namespace prototype1
                     float layerDepth = 0f;
                     switch (i)
                     {
-                        case 1: layerDepth = 0.0095f; break;
-                        case 2: layerDepth = 0.0094f; break;
-                        case 3: layerDepth = 0.0093f; break;
+                        case 1: layerDepth = 0.95f; break;
+                        case 2: layerDepth = 0.94f; break;
+                        case 3: layerDepth = 0.93f; break;
                     }
                     middleStream.LayerDepth = layerDepth + RandomHandler.GetRandomFloat(0.0001f);
 

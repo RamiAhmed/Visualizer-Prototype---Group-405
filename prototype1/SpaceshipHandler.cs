@@ -62,15 +62,15 @@ namespace prototype1
                 updateFrame(time);
             }
 
-            if (GameStateHandler.CurrentState == GameState.STARTING)
-            {
+            //if (GameStateHandler.CurrentState == GameState.STARTING)
+            //{
                 if (crashingShip == null)
                 {
                     startIntroSequence();
                     return;
                 }
-            }
-            else if (GameStateHandler.CurrentState == GameState.ENDING)
+            //}
+            /*else */if (GameStateHandler.CurrentState == GameState.ENDING)
             {
                 updateOutroSequence(time);
             }
@@ -97,7 +97,7 @@ namespace prototype1
 
         private void drawIntroSequence(SpriteBatch batch, GameTime time)
         {
-            if (crashingShip.Active)
+            if (crashingShip != null && crashingShip.Active)
             {
                 walkcycleSpeed = 100;
                 numFrames = 4;

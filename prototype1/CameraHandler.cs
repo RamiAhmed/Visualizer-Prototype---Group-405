@@ -24,7 +24,7 @@ namespace prototype1
                       viewportHeight = 0f;
 
         private int lastZoom = 0, zoomIntervals = 25; // every nth second
-        private float maxZoom = 4f, defaultZoom = 1f, zoomIncremental = 0.02f;
+        private float maxZoom = 4f, defaultZoom, zoomIncremental = 0.02f;
         private float yZoom = 30f, xZoom = 13.75f;
         
         public Vector2 defaultCameraPosition = new Vector2(Controller.TOTAL_WIDTH / 4, Controller.TOTAL_HEIGHT / 4);
@@ -35,6 +35,14 @@ namespace prototype1
             
         public CameraHandler()
         {
+            if (Controller.IS_FULL_SCREEN)
+            {
+                defaultZoom = 1.3f;
+            }
+            else
+            {
+                defaultZoom = 1f;
+            }
             this.Zoom = defaultZoom;
             this.Rotation = 0.0f;
             this.Position = defaultCameraPosition;  

@@ -25,7 +25,7 @@ namespace prototype1
                       inAmplitude;
 
         // DEBUG
-        private static bool debug = true;
+        private static bool debug = false;
 
         public OSCHandler()
         {
