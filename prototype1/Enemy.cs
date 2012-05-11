@@ -33,6 +33,8 @@ namespace prototype1
         // Time this class waits before starting to make enemies
         private float enemyStartWait = 5f;
 
+        private bool _isSheep;
+
         public Enemy()
         {
         }
@@ -62,7 +64,12 @@ namespace prototype1
                         Enemy enemy = enemySprites.ElementAt(i);
                         if (enemy.Active)
                         {
-                            enemy.Move(enemy.Position.X + enemy.Speed, enemy.Position.Y + RandomHandler.GetRandomFloat(-1, 1));
+                            enemy.Move(enemy.Position.X + enemy.Speed, enemy.Position.Y + RandomHandler.GetRandomFloat(-1f, 1f));
+
+                            if (Math.Abs(enemy.Position.Y - enemyStartPosition.Y) > 50f && enemy.IsSheep)
+                            {
+                                enemy.Move(enemy.Position.X, enemyStartPosition.Y);
+                            }
                         }
                         else
                         {
@@ -110,6 +117,15 @@ namespace prototype1
                 enemy.Width = 100;
                 enemy.Height = 100;
 
+                if (enemy.Texture == enemyTextures.ElementAt(0))
+                {
+                    enemy.IsSheep = true;
+                }
+                else
+                {
+                    enemy.IsSheep = false;
+                }
+
                 enemy.Speed = 0.5f;
                 enemy.LayerDepth = 0f;
                 enemy.ScaleFactor = 1f;
@@ -117,7 +133,14 @@ namespace prototype1
 
                 enemy.Active = true;
 
-                enemy.Move(enemyStartPosition.X + RandomHandler.GetRandomInt(-25, 25), enemyStartPosition.Y + RandomHandler.GetRandomInt(-10, 10));
+                if (enemy.IsSheep)
+                {
+                    enemy.Move(enemyStartPosition.X, enemyStartPosition.Y + RandomHandler.GetRandomInt(-10, 10));
+                }
+                else
+                {
+                    enemy.Move(enemyStartPosition.X, enemyStartPosition.Y - 50 + RandomHandler.GetRandomInt(-10, 10));
+                }
 
                 enemySprites.Add(enemy);
             }
@@ -125,31 +148,13 @@ namespace prototype1
 
         private Texture2D getRandomEnemyTexture()
         {
-            Texture2D enemyTex = null;
+            return enemyTextures.ElementAt(RandomHandler.GetRandomInt(enemyTextures.Count - 1));
+        }
 
-            if (enemyTextures.Count > 0)
-            {
-                foreach (Texture2D tex in enemyTextures)
-                {
-                    if (RandomHandler.GetRandomFloat(1) < 0.01f)
-                    {
-                        enemyTex = tex;
-                    }
-                }
-
-                if (enemyTex != null)
-                {
-                    return enemyTex;
-                }
-                else
-                {
-                    return getRandomEnemyTexture();
-                }
-            }
-            else
-            {
-                return null;
-            }
+        private bool IsSheep
+        {
+            get { return _isSheep; }
+            set { _isSheep = value; }
         }
     }
 }

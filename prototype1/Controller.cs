@@ -114,7 +114,7 @@ namespace prototype1
             int scenario = -1;
             while (scenario == -1)
             {
-                Console.WriteLine("Please input scenario number (0 = complete, 1 = no intro/outro, 2 = no enemies/obstacles)");
+                Console.WriteLine("Please input scenario number: \n(0 = complete, 1 = no intro/outro, 2 = no enemies/obstacles)");
                 scenario = Convert.ToInt32(Console.ReadLine());
             }
             SCENARIO_NUM = scenario;
@@ -204,7 +204,6 @@ namespace prototype1
                             loops = 1; 
                             break;
                 }
-
                         
                 for (j = 1; j <= loops; j++)
                 {
@@ -304,7 +303,11 @@ namespace prototype1
 
             if (GameStateHandler.CurrentState == GameState.RUNNING)
             {
-                if (SCENARIO_NUM != 2)
+                if (SCENARIO_NUM != 1)
+                {
+                    itemsHandler.updateItems(gameTime);
+                }
+                else if (SCENARIO_NUM != 2)
                 {
                     createObstacle(gameTime);
                     checkCollision(gameTime);
@@ -312,11 +315,7 @@ namespace prototype1
                     explosion.updateExplosions(gameTime);
                     enemy.updateEnemy(gameTime);
                 }
-                else if (SCENARIO_NUM != 1)
-                {
-                    itemsHandler.updateItems(gameTime);
-                }
-
+                
                 skyHandler.updateSky(gameTime);
 
                 updateAllSprites();
@@ -451,7 +450,7 @@ namespace prototype1
 
             if (GameStateHandler.CurrentState == GameState.IDLE)
             {
-                string text = "In IDLE mode. \nWaiting for input from Max 6";
+                string text = "In IDLE mode. \nWaiting for input from Max.";
                 Vector2 textPos = new Vector2(Controller.TOTAL_WIDTH * 0.5f - (mainFont.MeasureString(text).X * 0.5f), 
                                               Controller.TOTAL_HEIGHT * 0.5f - (mainFont.MeasureString(text).Y * 0.5f));
                 batch.DrawString(mainFont, text, textPos, Color.WhiteSmoke); 

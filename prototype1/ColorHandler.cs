@@ -48,8 +48,7 @@ namespace prototype1
             acceptedColors.Add(new Color(28, 13, 130));     // Blue
             acceptedColors.Add(new Color(166, 21, 134));    // Purple
             acceptedColors.Add(new Color(215, 19, 134));    // Pink
-            acceptedColors.Add(new Color(173, 14, 72));     // Pink-red
-             
+            acceptedColors.Add(new Color(173, 14, 72));     // Pink-red             
         }
 
 
@@ -66,13 +65,14 @@ namespace prototype1
                 smoothColor -= (incremental * 0.5f);
             }
 
-            if (smoothColor < 0.1f)
+            float min = 0.25f, max = 0.75f;
+            if (smoothColor < min)
             {
-                smoothColor = 0.1f;
+                smoothColor = min;
             }
-            else if (smoothColor > 0.9f)
+            else if (smoothColor > max)
             {
-                smoothColor = 0.9f;
+                smoothColor = max;
             }
 
             return new Color(smoothColor, smoothColor, smoothColor);
