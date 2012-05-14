@@ -39,7 +39,6 @@ namespace prototype1
         private Explosion explosion;
         private SkyHandler skyHandler;
 
-        private float obstacleCreationChance = 0.2f; // 20 %
         private SpriteFont mainFont;
 
         /* SONG HARDCODED PROPERTIES */
@@ -112,7 +111,7 @@ namespace prototype1
         private void handleSettingsInput()
         {
             int scenario = -1;
-            while (scenario == -1)
+            while (scenario < 0 || scenario > 2)
             {
                 Console.WriteLine("Please input scenario number: \n(0 = complete, 1 = no intro/outro, 2 = no enemies/obstacles)");
                 scenario = Convert.ToInt32(Console.ReadLine());
@@ -173,6 +172,9 @@ namespace prototype1
             hero.shipHandler.shipCrashTex = loadTexture("ramiBotShipCrash");
             hero.shipHandler.shipRepairTex = loadTexture("ramiBotShipFix");
             hero.shipHandler.shipTakeOffTex = loadTexture("ramiBotShipTakeoff");
+
+            // Boss texture
+            //hero.bossHandler.bossTexture = loadTexture("boss");
         }
 
         private void loadEnemyTextures()
@@ -290,9 +292,9 @@ namespace prototype1
                     {
                         GameStateHandler.CurrentState = GameState.STARTING;
                     }
+
                     timeOfStart = DateTime.Now.TimeOfDay;
                 }
-
             }
             else
             {
@@ -307,7 +309,8 @@ namespace prototype1
                 {
                     itemsHandler.updateItems(gameTime);
                 }
-                else if (SCENARIO_NUM != 2)
+                
+                if (SCENARIO_NUM != 2)
                 {
                     createObstacle(gameTime);
                     checkCollision(gameTime);
@@ -320,14 +323,21 @@ namespace prototype1
 
                 updateAllSprites();
                 
-
-                if ((int)gameTime.TotalGameTime.TotalSeconds > songDuration-10)
+                int totalSecs = (int)gameTime.TotalGameTime.TotalSeconds;
+                if (totalSecs > songDuration - 10)
                 {
                     if (SCENARIO_NUM != 1)
                     {
                         GameStateHandler.CurrentState = GameState.ENDING;
                     }
                     Console.WriteLine("Ending visualization");
+                }
+            }
+            else if (GameStateHandler.CurrentState == GameState.ENDING)
+            {
+                if (SpaceshipHandler.gameOver)
+                {
+                    Game.Exit();
                 }
             }
             base.Update(gameTime);
@@ -473,6 +483,7 @@ namespace prototype1
                     obstacleHandler.drawObstacles(batch, gameTime);
                     enemy.drawEnemy(batch, gameTime);
                 }
+
                 skyHandler.drawSky(batch, gameTime);
             }
             batch.End();

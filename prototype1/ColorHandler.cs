@@ -19,6 +19,8 @@ namespace prototype1
 
         private static float smoothColor = 0.5f;
 
+        private static bool debug = true;
+
         public static void loadColors()
         {
             // 12 colors in total
@@ -51,6 +53,38 @@ namespace prototype1
             acceptedColors.Add(new Color(173, 14, 72));     // Pink-red             
         }
 
+        public static Color smoothToGray(Color currentColor)
+        {
+            /*float incremental = 0.001f;
+            float gray = 0.5f;
+
+            float red = currentColor.R / 255,
+                green = currentColor.G / 255,
+                blue = currentColor.B / 255;
+
+            if (debug)
+            {
+                Console.WriteLine("red: " + red.ToString() + ", green: " + green.ToString() + ", blue: " + blue.ToString());
+            }
+
+            if (red > gray)
+                red -= incremental;
+            else if (red < gray)
+                red += incremental;
+
+            if (green > gray)
+                green -= incremental;
+            else if (green < gray)
+                green += incremental;
+
+            if (blue > gray)
+                blue -= incremental;
+            else if (blue < gray)
+                blue += incremental;
+
+            return new Color(red, green, blue); // probably thinks it's ints*/
+            return currentColor;
+        }
 
         public static Color getSmoothFogColor()
         {
@@ -65,7 +99,7 @@ namespace prototype1
                 smoothColor -= (incremental * 0.5f);
             }
 
-            float min = 0.25f, max = 0.75f;
+            float min = 0.2f, max = 0.9f;
             if (smoothColor < min)
             {
                 smoothColor = min;

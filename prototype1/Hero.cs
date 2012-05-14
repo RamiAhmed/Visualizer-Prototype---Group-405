@@ -18,7 +18,7 @@ namespace prototype1
         // General stuff
         public Texture2D heroTex;
         static public bool heroReady = false;
-        private float failureChance = 0.05f;
+       // private float failureChance = 0.05f;
 
         // Intro & outro stuff
         public Vector2 heroStartIntroPosition = new Vector2(0, 0);
@@ -38,9 +38,6 @@ namespace prototype1
         private long lastItemPickUp = 0;
         private float pickUpPoseTime = 0.75f;
 
-        private long lastFail = 0;
-        private float failTime = 1f;
-
         // Jumping
         private float defaultJumpHeight = 10f;
         private float superJumpChance = 0.10f;
@@ -48,17 +45,21 @@ namespace prototype1
         private float introGravity = 0.0225f;
         private float introDefaultJumpHeight = 9f;
 
+        // Boss fight
+        //public BossHandler bossHandler;
+
         private bool debug = false;
 
         // Getters & Setters
         private HeroState currentState;
         private float jumpHeight;
 
-        public enum HeroState { WALKING, SUPERJUMPING, JUMPING, SLIDING, KICKING, PICKING_UP, FAILING };
+        public enum HeroState { WALKING, SUPERJUMPING, JUMPING, SLIDING, KICKING, PICKING_UP, FIGHTING };
 
         public Hero()
         {
             shipHandler = new SpaceshipHandler(this);
+            //bossHandler = new BossHandler(this);
         }
 
         public void createHero()
@@ -70,7 +71,7 @@ namespace prototype1
             this.LayerDepth = 0f;
             this.ScaleFactor = heroScale;
             this.Rotation = 0f;
-            this.Color = Color.Gray;
+            this.Color = Color.White;
 
             this.Move(heroStartIntroPosition);
             this.Active = true;
@@ -78,13 +79,12 @@ namespace prototype1
 
         public void updateHero(GameTime gameTime)
         {
-            if (shipHandler != null)
+            if (shipHandler != null && Controller.SCENARIO_NUM != 1)
             {
-                if (Controller.SCENARIO_NUM != 1)
-                {
-                    shipHandler.updateSpaceship(gameTime);
-                }
+                shipHandler.updateSpaceship(gameTime);
             }
+
+            //bossHandler.updateBoss(gameTime);
 
             if (Controller.SCENARIO_NUM == 1 && !heroReady)
             {
@@ -97,7 +97,7 @@ namespace prototype1
                 this.Color = ColorHandler.getCurrentColor();
 
                 if (this.CurrentState == HeroState.WALKING) 
-                {
+                {                 
                     float tolerance = 50f;
                     if (Math.Abs(this.Position.X - heroStartPosition.X) < tolerance &&
                         Math.Abs(this.Position.Y - heroStartPosition.Y) < (tolerance * 0.5f))
@@ -129,19 +129,10 @@ namespace prototype1
                         }                        
                     }
                 }
-                else if (this.CurrentState == HeroState.FAILING)
-                {
-                    long currentMilliseconds = (long)gameTime.TotalGameTime.TotalMilliseconds;
-                    if (currentMilliseconds - lastFail <= failTime * 1000f)
-                    {
-                       // heroReady = false;
-                    }
-                    else 
-                    {
-                       // heroReady = true;
-                        //this.CurrentState = HeroState.WALKING;                        
-                    }
-                }
+            }
+            else if (GameStateHandler.CurrentState == GameState.ENDING)
+            {
+                //this.Color = ColorHandler.smoothToGray(this.Color);
             }
         }
 
@@ -242,6 +233,8 @@ namespace prototype1
             {
                 if (this.Active)
                 {
+                    //bossHandler.drawBoss(batch, gameTime);
+
                     int yPos = 0,
                         xPos = 0;
                     switch (this.CurrentState)
@@ -261,6 +254,11 @@ namespace prototype1
                             walkcycleSpeed = 125;
                             break;
 
+                        case HeroState.FIGHTING:
+                            yPos = this.Height * 4;
+                            walkcycleSpeed = 110;
+                            break;
+
                         case HeroState.KICKING:
                             yPos = this.Height  * 4;
                             walkcycleSpeed = 85;
@@ -269,12 +267,7 @@ namespace prototype1
                         case HeroState.PICKING_UP:
                             yPos = this.Height * 5;
                             xPos = 1;
-                            break;
-
-                        case HeroState.FAILING:
-                            yPos = this.Height * 5;
-                            xPos = this.Width;
-                            break;
+                            break;    
 
                         case HeroState.SUPERJUMPING:
                             yPos = this.Height * 6;
@@ -291,7 +284,6 @@ namespace prototype1
                     {
                         animcycle = new Rectangle(xPos, yPos, this.Width, this.Height);
                     }
-
 
                     batch.Draw(this.Texture, this.Position, animcycle, this.Color, this.Rotation, 
                         new Vector2(0, 0), this.ScaleFactor, SpriteEffects.None, this.LayerDepth);

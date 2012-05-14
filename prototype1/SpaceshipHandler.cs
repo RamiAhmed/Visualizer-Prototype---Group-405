@@ -15,6 +15,8 @@ namespace prototype1
 {
     class SpaceshipHandler
     {
+        public static bool gameOver = false;
+
         // Crashing space ship (START)
         public Texture2D shipCrashTex;
         public Sprite crashingShip;
@@ -122,7 +124,7 @@ namespace prototype1
 
         private void startOutroSequence()
         {
-            heroRef.Color = Color.Gray;
+            heroRef.Color = Color.White;
             heroRef.Move(heroRef.heroStartPosition);
 
             crashingShip.ScaleFactor = 1.5f;
@@ -240,6 +242,11 @@ namespace prototype1
                             // ship is ready for take off
                             crashingShip.Speed += 0.1f;
                             crashingShip.Move(crashingShip.Position.X + crashingShip.Speed + 1f, crashingShip.Position.Y - crashingShip.Speed);
+
+                            if (crashingShip.Position.X + crashingShip.Width > Controller.TOTAL_WIDTH)
+                            {
+                                gameOver = true;
+                            }
                         }
                     }
                 }
